@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Route } from "./+types/newhabit";
 import { Link, useNavigate } from "react-router";
-import type { Habit } from "@shared/types";
+import type { CreateHabitFormData, Habit } from "@shared/types";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -27,7 +27,7 @@ const HabitTypeLookup = {
 } as const satisfies Record<string, HabitType>;
 
 export default function NewHabit() {
-  const [habitDescription, setHabitDescription] = useState("");
+  const [habitDescription, setHabitDescription] = useState<string>("");
   const [habitTypeKey, setHabitTypeKey] = useState<HabitTypeKey>(
     Object.keys(HabitTypeLookup)[0] as HabitTypeKey,
   );
@@ -44,19 +44,21 @@ export default function NewHabit() {
           e.preventDefault();
 
           const habitType = HabitTypeLookup[habitTypeKey];
+          const body: CreateHabitFormData = {
+            description: habitDescription,
+            interval: habitType.interval,
+            reps: habitType.reps,
+            current_sticker_pack_id: "15c8528c-99ae-484f-9392-dc75ba6e6f2d", //TODO: implement sticker pack selection
+          };
           const result = await fetch(url, {
             method: "POST",
-            body: JSON.stringify({
-              description: habitDescription,
-              interval: habitType.interval,
-              reps: habitType.reps,
-              stickerpack_id: -1, //TODO: implement sticker pack selection
-            }),
+            body: JSON.stringify(body),
           });
           if (result.ok) {
             navigate("/");
           } else {
-            setErrorMsg(`${result.status}: ${result.statusText}`);
+            const response = await result.json();
+            setErrorMsg(`${result.status}: ${response.msg}`);
           }
         }}
       >
@@ -83,7 +85,9 @@ export default function NewHabit() {
             required
           >
             {Object.keys(HabitTypeLookup).map((key) => (
-              <option value={key}>{key}</option>
+              <option key={key} value={key}>
+                {key}
+              </option>
             ))}
           </select>
         </div>

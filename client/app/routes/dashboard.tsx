@@ -1,6 +1,9 @@
 import LogoutButton from "~/ui/LogoutButton";
 import type { Route } from "./+types/dashboard";
-import { Link } from "react-router";
+import { Await, Link, useLoaderData } from "react-router";
+import type { HabitSummary } from "@shared/types";
+import { Suspense } from "react";
+import { HabitCard } from "~/ui/HabitCard";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -9,11 +12,37 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+async function getHabitSummaries(cookie: string) {
+  const res = await fetch(`${process.env.API_URL!}api/habits/summary`, {
+    headers: { cookie },
+  });
+  const data = (await res.json()).data;
+  return data;
+}
+
+export function loader({ request }: Route.LoaderArgs) {
+  return {
+    habitSummaries: getHabitSummaries(request.headers.get("cookie") ?? ""),
+  };
+}
+
 export default function Dashboard() {
+  const { habitSummaries } = useLoaderData<typeof loader>();
   return (
     <>
       <h1>Dashboard</h1>
       <LogoutButton />
+      <div className="flex flex-col gap-4 p-4">
+        <Suspense fallback={<p>Loading...</p>}>
+          <Await resolve={habitSummaries}>
+            {(habitSummaries) =>
+              habitSummaries.map((s: HabitSummary) => (
+                <HabitCard key={s.id} data={s} />
+              ))
+            }
+          </Await>
+        </Suspense>
+      </div>
       <Link to="/new-habit" className="as-btn">
         Start New Habit
       </Link>

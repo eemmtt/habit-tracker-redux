@@ -1,12 +1,14 @@
 {
   "name": "server",
   "scripts": {
-    "dev": "bun run --hot ./index.ts"
+    "dev": "bun run --hot ./index.ts",
+    "db:seed": "bun run db/seed.ts"
   },
   "dependencies": {
     "@react-email/render": "^2.0.4",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.2",
+    "drizzle-seed": "^0.3.1",
     "drizzle-zod": "^0.8.3",
     "hono": "^4.12.9",
     "postgres": "^3.4.8",

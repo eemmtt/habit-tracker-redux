@@ -7,32 +7,22 @@ import {
   table_users,
   table_verification_codes,
 } from "../db/schema";
-import { z } from "zod";
 import { Resend } from "resend";
 import { EmailTemplate } from "../emails/email-template";
 import { and, eq, gt, sql } from "drizzle-orm";
+import {
+  insertUserSchema,
+  insertVerificationCodeSchema,
+  selectVerificationCodeSchema,
+} from "../db/validation_schemas";
 
 //TODO: implement rate limiting
 const auth = new Hono<{ Variables: CtxVariables }>();
 const resend = new Resend(process.env.RESEND_KEY!);
 
-const reqCodeSchema = z.object({
-  email: z.email().max(254).toLowerCase(),
-});
-
-const verifyCodeSchema = z.object({
-  email: z.email().max(254).toLowerCase(),
-  code: z.uuid(),
-});
-
-const signupSchema = z.object({
-  email: z.email().max(254).toLowerCase(),
-  invite_code: z.string().length(13),
-});
-
 auth.post("/request-code", async (c) => {
   const payload = await c.req.json();
-  const validated = await reqCodeSchema.safeParse(payload);
+  const validated = await insertVerificationCodeSchema.safeParse(payload);
   if (!validated.success) return c.json({ msg: validated.error.message }, 400);
   const { email } = validated.data;
 
@@ -91,7 +81,7 @@ auth.post("/verify-code", async (c) => {
 
   //parse verification code
   const payload = await c.req.json();
-  const validated = await verifyCodeSchema.safeParse(payload);
+  const validated = await selectVerificationCodeSchema.safeParse(payload);
   if (!validated.success) return c.json({ msg: validated.error.message }, 400);
   const { email, code } = validated.data;
 
@@ -162,7 +152,7 @@ auth.post("/logout", async (c) => {
 auth.post("/signup", async (c) => {
   //parse email from form
   const payload = await c.req.json();
-  const validated = signupSchema.safeParse(payload);
+  const validated = insertUserSchema.safeParse(payload);
   if (!validated.success) return c.json({ msg: validated.error.message }, 400);
   const { email, invite_code } = validated.data;
 
