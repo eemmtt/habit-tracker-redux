@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js";
-import { seed } from "drizzle-seed";
 import { table_milestones, table_sticker_packs } from "./schema";
+import { configDotenv } from "dotenv";
 
 const milestones = [
   { num_days: 7, label: "One Week" },
@@ -11,6 +11,7 @@ const milestones = [
 ];
 
 async function main() {
+  configDotenv();
   const db = drizzle(process.env.DATABASE_URL!);
 
   await db.delete(table_milestones);

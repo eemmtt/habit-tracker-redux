@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "strict": true,
-    "moduleResolution": "node"
+    "moduleResolution": "nodenext",
+    "module": "nodenext"
   },
   "include": ["shared", "server"]
 }
