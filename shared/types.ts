@@ -12,13 +12,32 @@ export type Sticker = typeof table_stickers.$inferSelect;
 export type PlacedSticker = typeof table_stickers_placed.$inferSelect;
 
 export type CreateHabitFormData = ReturnType<typeof insertHabitSchema.parse>;
+export type StickerSummary = {
+  sticker_placed_id: string;
+  placed_at: string;
+  variant: "Normal" | "Foil";
+  sticker_id: string;
+  imageUrl: string | null;
+  sticker_name: string;
+};
+
+export type StickersByPlacedAt = Map<string, StickerSummary>;
 
 export type HabitSummary = Pick<
   Habit,
-  "id" | "description" | "current_streak" | "interval" | "reps"
+  | "id"
+  | "description"
+  | "current_streak"
+  | "interval"
+  | "reps"
+  | "current_sticker_pack_id"
 > & {
-  stickers: Array<
-    Pick<PlacedSticker, "id" | "placed_at" | "variant"> &
-      Pick<Sticker, "imageUrl">
-  >;
+  type_str: string;
+  adh: string;
+  next_ms: string;
+  // stickers: Array<
+  //   Pick<PlacedSticker, "id" | "placed_at" | "variant"> &
+  //     Pick<Sticker, "imageUrl">
+  // >;
+  stickers: StickerSummary[];
 };

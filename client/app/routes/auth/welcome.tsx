@@ -16,13 +16,13 @@ export default function Welcome() {
     <>
       <h1>Welcome</h1>
       <button
-        className={formState === "login" ? "btn-selected" : ""}
+        className={formState === "login" ? "as-btn selected" : "as-btn"}
         onClick={() => setFormState("login")}
       >
         Login
       </button>
       <button
-        className={formState === "register" ? "btn-selected" : ""}
+        className={formState === "register" ? "as-btn selected" : "as-btn"}
         onClick={() => setFormState("register")}
       >
         Register

@@ -4,12 +4,14 @@ import { insertHabitSchema } from "../db/validation_schemas";
 import { db } from "../lib/db";
 import {
   table_habits,
+  table_milestones,
   table_stickers,
   table_stickers_placed,
 } from "../db/schema";
 import { and, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 
 import type { HabitSummary } from "../../shared/types";
+import { dateToStr } from "../../shared/helpers";
 
 const habits = new Hono<{ Variables: CtxVariables }>();
 
@@ -56,6 +58,7 @@ habits.get("/summary", async (c) => {
       current_streak: table_habits.current_streak,
       interval: table_habits.interval,
       reps: table_habits.reps,
+      current_sticker_pack_id: table_habits.current_sticker_pack_id,
     })
     .from(table_habits)
     .where(
@@ -68,10 +71,12 @@ habits.get("/summary", async (c) => {
   const stickers = await db
     .select({
       habitId: table_stickers_placed.habit_id,
-      id: table_stickers_placed.id,
+      sticker_placed_id: table_stickers_placed.id,
       placed_at: table_stickers_placed.placed_at,
       variant: table_stickers_placed.variant,
+      sticker_id: table_stickers.id,
       imageUrl: table_stickers.imageUrl,
+      sticker_name: table_stickers.name,
     })
     .from(table_stickers_placed)
     .innerJoin(
@@ -85,14 +90,60 @@ habits.get("/summary", async (c) => {
           habits.map((h) => h.id),
         ),
         gte(table_stickers_placed.placed_at, sql`date_trunc('week', now())`),
+        isNull(table_stickers_placed.deleted_at),
       ),
     );
 
-  const stickersByHabit = Map.groupBy(stickers, (s) => s.habitId);
-  const summary: HabitSummary[] = habits.map((h) => ({
-    ...h,
-    stickers: (stickersByHabit.get(h.id) ?? []).map(({ habitId, ...s }) => s),
-  }));
+  const milestones = await db.select().from(table_milestones);
+
+  function getNextMs(
+    streak: number,
+    milestones: {
+      id: number;
+      num_days: number;
+      label: string;
+    }[],
+  ) {
+    if (streak < milestones[0].num_days) return milestones[0];
+    for (let i = 0; i < milestones.length; i++) {
+      if (streak > milestones[i].num_days) return milestones[i];
+    }
+    return milestones[milestones.length - 1];
+  }
+
+  function getTypeStr(interval: string, reps: number) {
+    const joined = interval + " " + reps.toString();
+
+    switch (joined) {
+      case "daily 1":
+        return "Once Daily";
+      case "daily 2":
+        return "Twice Daily";
+      case "weekly 1":
+        return "Once Weekly";
+      default:
+        return `${reps} ${interval}`;
+    }
+  }
+
+  const stickersByHabitMap = Map.groupBy(stickers, (s) => s.habitId);
+  const summary: HabitSummary[] = habits.map((h) => {
+    const habitStickers = (stickersByHabitMap.get(h.id) ?? []).map(
+      ({ habitId, placed_at, ...s }) => {
+        return {
+          ...s,
+          placed_at: dateToStr(placed_at),
+        };
+      },
+    );
+    return {
+      ...h,
+      type_str: getTypeStr(h.interval, h.reps),
+      next_ms: getNextMs(h.current_streak, milestones).label,
+      adh: "",
+      stickers: habitStickers,
+    };
+  });
 
   return c.json(
     {

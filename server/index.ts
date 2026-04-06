@@ -6,6 +6,7 @@ import { table_sessions, table_users } from "./db/schema";
 import { eq } from "drizzle-orm";
 import { CtxVariables } from "./types";
 import habits from "./routes/habits";
+import stickers from "./routes/stickers";
 
 const app = new Hono<{ Variables: CtxVariables }>();
 
@@ -45,6 +46,7 @@ app.get("/", (c) => {
 
 app.route("/api/auth", auth);
 app.route("/api/habits", habits);
+app.route("/api/stickers", stickers);
 
 app.notFound((c) => {
   return c.json({ ok: false, msg: "Woosp, it's a 404" }, 404);

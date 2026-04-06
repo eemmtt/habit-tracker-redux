@@ -81,7 +81,7 @@ export default function LoginForm() {
         </div>
       )}
       {errorMsg && <p className="error-msg text-red-600 text-sm">{errorMsg}</p>}
-      <button type="submit">
+      <button type="submit" className="as-btn">
         {form === "request" ? "Send Verification Code" : "Login"}
       </button>
     </form>

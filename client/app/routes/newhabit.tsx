@@ -100,7 +100,9 @@ export default function NewHabit() {
         )}
 
         <div className="flex flex-row gap-2 w-full max-w-sm">
-          <button type="submit">Create Habit</button>
+          <button type="submit" className="as-btn">
+            Create Habit
+          </button>
           <Link to="/" className="as-btn">
             Cancel
           </Link>

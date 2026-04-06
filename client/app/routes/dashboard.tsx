@@ -32,7 +32,7 @@ export default function Dashboard() {
     <>
       <h1>Dashboard</h1>
       <LogoutButton />
-      <div className="flex flex-col gap-4 p-4">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(350px,1fr))] gap-4 p-4">
         <Suspense fallback={<p>Loading...</p>}>
           <Await resolve={habitSummaries}>
             {(habitSummaries) =>

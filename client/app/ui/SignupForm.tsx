@@ -81,7 +81,9 @@ export default function SignupForm() {
         ></input>
       </div>
       {errorMsg && <p className="error-msg text-red-600 text-sm">{errorMsg}</p>}
-      <button type="submit">Submit</button>
+      <button type="submit" className="as-btn">
+        Submit
+      </button>
     </form>
   );
 }

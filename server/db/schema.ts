@@ -5,6 +5,7 @@ import {
   pgEnum,
   pgTable,
   timestamp,
+  unique,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -74,20 +75,25 @@ export const table_stickers = pgTable("stickers", {
 
 export const stickerVariantEnum = pgEnum("stickerVariant", ["Normal", "Foil"]);
 
-export const table_stickers_placed = pgTable("stickersPlaced", {
-  id: uuid().primaryKey().defaultRandom(),
-  user_id: uuid()
-    .notNull()
-    .references(() => table_users.id),
-  habit_id: uuid()
-    .notNull()
-    .references(() => table_habits.id),
-  sticker_id: uuid()
-    .notNull()
-    .references(() => table_stickers.id),
-  placed_at: timestamp("placed_at").defaultNow().notNull(),
-  variant: stickerVariantEnum().notNull(),
-});
+export const table_stickers_placed = pgTable(
+  "stickersPlaced",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    user_id: uuid()
+      .notNull()
+      .references(() => table_users.id),
+    habit_id: uuid()
+      .notNull()
+      .references(() => table_habits.id),
+    sticker_id: uuid()
+      .notNull()
+      .references(() => table_stickers.id),
+    placed_at: timestamp("placed_at").defaultNow().notNull(),
+    deleted_at: timestamp("deleted_at"),
+    variant: stickerVariantEnum().notNull(),
+  },
+  (t) => [unique().on(t.habit_id, t.placed_at)],
+);
 
 export const table_milestones = pgTable("milestones", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),

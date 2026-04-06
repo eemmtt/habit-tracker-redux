@@ -1,40 +1,138 @@
-import type { HabitSummary } from "@shared/types";
+import type {
+  HabitSummary,
+  StickersByPlacedAt,
+  StickerSummary,
+} from "@shared/types";
 import Stat from "./Stat";
+import { useState } from "react";
+import { dateToStr } from "@shared/helpers";
+import { useRevalidator } from "react-router";
 
-// function calcTimeElapsed(interval: HabitInterval, start: string) {
-//   const DAY_MS = 1000 * 60 * 60 * 24;
-//   const WEEK_MS = DAY_MS * 7;
+function getWeekAsArray() {
+  const today = new Date();
+  const monday = new Date(
+    today.setDate(
+      today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1),
+    ),
+  );
 
-//   const startDate = new Date(start);
-//   const endDate = new Date(); //today
-//   const startUTC = Date.UTC(
-//     startDate.getFullYear(),
-//     startDate.getMonth(),
-//     startDate.getDate(),
-//   );
-//   const endUTC = Date.UTC(
-//     endDate.getFullYear(),
-//     endDate.getMonth(),
-//     endDate.getDate(),
-//   );
-//   const msPassed = Math.floor(Math.abs(endUTC - startUTC));
+  const currentWeek = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    return dateToStr(date);
+  });
 
-//   if (interval === "once-daily" || interval === "twice-daily") {
-//     return msPassed / DAY_MS;
-//   } else {
-//     return msPassed / WEEK_MS;
-//   }
-// }
+  return currentWeek;
+}
 
-export function HabitCard({ data }: { data: HabitSummary }) {
-  //   const elapsed = calcTimeElapsed(data.type, data.dateStarted);
-  //   const adherence = (data.placedStickers.length / elapsed) * 100;
-  //   const nextMs = findNextMS(data.currentStreak);
+function StickerSpot({
+  label,
+  sticker,
+  date,
+  placeSticker,
+  removeSticker,
+}: {
+  label: number;
+  sticker: StickerSummary | undefined;
+  date: string;
+  placeSticker: (d: string) => Promise<void>;
+  removeSticker: (id: string) => Promise<void>;
+}) {
+  return (
+    <div className="relative">
+      <button
+        className="border rounded-full aspect-square w-full"
+        onClick={sticker ? () => removeSticker(date) : () => placeSticker(date)}
+      >
+        {label}
+      </button>
+      {sticker && (
+        <img
+          src={sticker.imageUrl ?? ""}
+          alt={sticker.sticker_name}
+          className="absolute left-0 top-0 w-16 h-16"
+        ></img>
+      )}
+    </div>
+  );
+}
 
-  const units = data.interval === "weekly" ? "wk" : "d";
+function StickerArea({
+  stickers,
+  placeSticker,
+  removeSticker,
+}: {
+  stickers: StickersByPlacedAt;
+  placeSticker: (d: string) => Promise<void>;
+  removeSticker: (id: string) => Promise<void>;
+}) {
+  const weekDates = getWeekAsArray();
 
   return (
-    <div className="w-full h-fit rounded bg-amber-200 shadow-[0_4px_4px_0_rgba(0,0,0,0.25)]">
+    <div className="grid grid-cols-7 grid-rows-1 items-center w-full gap-2 p-2 bg-background rounded-b">
+      {weekDates.map((d, idx) => (
+        <StickerSpot
+          key={d}
+          label={idx}
+          date={d}
+          sticker={stickers.get(d)}
+          placeSticker={placeSticker}
+          removeSticker={removeSticker}
+        />
+      ))}
+    </div>
+  );
+}
+
+export function HabitCard({ data }: { data: HabitSummary }) {
+  const { revalidate } = useRevalidator();
+
+  const units = data.interval === "weekly" ? "wk" : "d";
+  const stickersByPlacedAt: StickersByPlacedAt = new Map(
+    data.stickers.map(({ placed_at, ...i }) => [
+      placed_at,
+      { placed_at, ...i },
+    ]),
+  );
+
+  async function placeSticker(d: string) {
+    const body = JSON.stringify({
+      habit_id: data.id,
+      pack_id: data.current_sticker_pack_id,
+      placed_at: d,
+    });
+
+    const res = await fetch("/api/stickers/place", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: body,
+    });
+    if (res.ok) {
+      revalidate();
+    }
+  }
+
+  async function removeSticker(id: string) {
+    const body = JSON.stringify({
+      placed_sticker_id: id,
+    });
+
+    const res = await fetch("/api/stickers/remove", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: body,
+    });
+    if (res.ok) {
+      revalidate();
+    }
+  }
+
+  return (
+    <div className="w-full max-w-100 h-fit rounded bg-amber-200 shadow-[0_4px_4px_0_rgba(0,0,0,0.25)]">
       <div className="flex flex-row">
         <Stat
           classNames={{ root: "grow", label: "rounded-tl" }}
@@ -54,7 +152,7 @@ export function HabitCard({ data }: { data: HabitSummary }) {
         <Stat
           classNames={{ root: "grow" }}
           label="HABIT TYPE"
-          description={"data.type"}
+          description={data.type_str}
         />
         <Stat
           classNames={{ root: "grow" }}
@@ -65,19 +163,14 @@ export function HabitCard({ data }: { data: HabitSummary }) {
         <Stat
           classNames={{ root: "grow" }}
           label="NEXT MS"
-          description={"milestone"}
-          units={units}
+          description={data.next_ms}
         />
       </div>
-      <div className="grid grid-cols-7 grid-rows-1 items-center w-full gap-2 p-2 bg-background rounded-b">
-        <button className="border rounded-full aspect-square">1</button>
-        <button className="border rounded-full aspect-square">2</button>
-        <button className="border rounded-full aspect-square">3</button>
-        <button className="border rounded-full aspect-square">4</button>
-        <button className="border rounded-full aspect-square">5</button>
-        <button className="border rounded-full aspect-square">6</button>
-        <button className="border rounded-full aspect-square">7</button>
-      </div>
+      <StickerArea
+        stickers={stickersByPlacedAt}
+        placeSticker={placeSticker}
+        removeSticker={removeSticker}
+      />
     </div>
   );
 }

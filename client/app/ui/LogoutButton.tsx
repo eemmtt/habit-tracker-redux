@@ -7,6 +7,7 @@ export default function LogoutButton() {
 
   return (
     <button
+      className="as-btn"
       onClick={async (e) => {
         e.preventDefault();
         const options = {
