@@ -4,7 +4,7 @@ import type {
   StickerSummary,
 } from "@shared/types";
 import Stat from "./Stat";
-import { useState } from "react";
+import { act, useState } from "react";
 import { dateToStr } from "@shared/helpers";
 import { useRevalidator } from "react-router";
 
@@ -26,34 +26,58 @@ function getWeekAsArray() {
 }
 
 function StickerSpot({
+  active,
   label,
   sticker,
   date,
   placeSticker,
   removeSticker,
 }: {
+  active: boolean;
   label: number;
   sticker: StickerSummary | undefined;
   date: string;
   placeSticker: (d: string) => Promise<void>;
   removeSticker: (id: string) => Promise<void>;
 }) {
+  const buttonClassesActive =
+    "border rounded-full aspect-square w-full cursor-pointer hover:bg-amber-50";
+  const buttonClassesInActive =
+    "border rounded-full aspect-square w-full border-inactive text-inactive";
+
   return (
-    <div className="relative">
-      <button
-        className="border rounded-full aspect-square w-full cursor-pointer hover:bg-amber-50"
-        onClick={sticker ? () => removeSticker(date) : () => placeSticker(date)}
-      >
-        {label}
-      </button>
-      {sticker && (
-        <img
-          src={sticker.imageUrl ? sticker.imageUrl + "_256px.webp" : ""}
-          alt={sticker.sticker_name}
-          className="absolute left-0 top-0 w-16 h-16"
-        ></img>
+    <>
+      {sticker ? (
+        <div
+          className="relative"
+          id={date}
+          onClick={() => removeSticker(sticker.sticker_placed_id)}
+        >
+          <button
+            className={active ? buttonClassesActive : buttonClassesInActive}
+          >
+            {label}
+          </button>
+          <img
+            src={sticker.imageUrl ? sticker.imageUrl + "_256px.webp" : ""}
+            alt={sticker.sticker_name}
+            className="absolute left-0 top-0 w-16 h-16 cursor-pointer"
+          ></img>
+        </div>
+      ) : (
+        <div
+          className="relative"
+          id={date}
+          onClick={active ? () => placeSticker(date) : () => {}}
+        >
+          <button
+            className={active ? buttonClassesActive : buttonClassesInActive}
+          >
+            {label}
+          </button>
+        </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -67,6 +91,7 @@ function StickerArea({
   removeSticker: (id: string) => Promise<void>;
 }) {
   const weekDates = getWeekAsArray();
+  const today = dateToStr(new Date());
 
   return (
     <div className="grid grid-cols-7 grid-rows-1 items-center w-full gap-2 p-2 bg-background rounded-b">
@@ -75,6 +100,7 @@ function StickerArea({
           key={d}
           label={idx}
           date={d}
+          active={d === today}
           sticker={stickers.get(d)}
           placeSticker={placeSticker}
           removeSticker={removeSticker}
@@ -115,8 +141,9 @@ export function HabitCard({ data }: { data: HabitSummary }) {
   }
 
   async function removeSticker(id: string) {
+    console.log("remove sticker", id);
     const body = JSON.stringify({
-      placed_sticker_id: id,
+      id: id,
     });
 
     const res = await fetch("/api/stickers/remove", {
@@ -128,6 +155,9 @@ export function HabitCard({ data }: { data: HabitSummary }) {
     });
     if (res.ok) {
       revalidate();
+    } else {
+      const body = await res.json();
+      console.log(body.msg);
     }
   }
 

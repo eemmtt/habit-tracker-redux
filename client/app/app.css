@@ -16,6 +16,7 @@
   --color-primary: #000000;
   --color-secondary: #6a6a6a;
   --color-header-bg: #e8e2e9;
+  --color-inactive: rgb(128,128,128);
 }
 
 @media (prefers-color-scheme: dark) {
