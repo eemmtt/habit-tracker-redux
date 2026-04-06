@@ -27,7 +27,17 @@ export default function StickerPackSelection({
               handleClick(s.id);
             }}
           >
-            {s.name}
+            <h2>{s.name}</h2>
+            <ul className="flex flex-row gap-2">
+              {s.stickers.map((sticker) => (
+                <img
+                  key={sticker.sticker_id}
+                  className="w-16 h-16"
+                  src={sticker.imageUrl + "_256px.webp"}
+                  alt={sticker.sticker_name}
+                ></img>
+              ))}
+            </ul>
           </li>
         ))}
       </ul>

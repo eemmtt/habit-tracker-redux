@@ -41,14 +41,14 @@ function StickerSpot({
   return (
     <div className="relative">
       <button
-        className="border rounded-full aspect-square w-full"
+        className="border rounded-full aspect-square w-full cursor-pointer hover:bg-amber-50"
         onClick={sticker ? () => removeSticker(date) : () => placeSticker(date)}
       >
         {label}
       </button>
       {sticker && (
         <img
-          src={sticker.imageUrl ?? ""}
+          src={sticker.imageUrl ? sticker.imageUrl + "_256px.webp" : ""}
           alt={sticker.sticker_name}
           className="absolute left-0 top-0 w-16 h-16"
         ></img>

@@ -5,7 +5,7 @@ import {
   removePlacedStickerSchema,
 } from "../db/validation_schemas";
 import { db } from "../lib/db";
-import { table_stickers_placed } from "../db/schema";
+import { table_stickers, table_stickers_placed } from "../db/schema";
 import { and, eq, isNotNull, sql } from "drizzle-orm";
 
 const stickers = new Hono<{ Variables: CtxVariables }>();
@@ -44,8 +44,27 @@ stickers.post("/place", async (c) => {
   //else
   //pick random sticker from current pack
   //insert placed_sticker
+  const stickers = await db
+    .select()
+    .from(table_stickers)
+    .where(eq(table_stickers.sticker_pack_id, pack_id));
+  if (stickers.length === 0)
+    return c.json({ msg: `No stickers found in sticker pack` }, 404);
 
-  return c.json({ msg: "Not implemented" }, 404);
+  const rIdx = Math.floor(Math.random() * stickers.length);
+
+  try {
+    await db.insert(table_stickers_placed).values({
+      user_id: user_id,
+      habit_id: habit_id,
+      sticker_id: stickers[rIdx].id,
+      variant: "Normal",
+    });
+  } catch (error) {
+    return c.json({ msg: "Failed to insert placed sticker" }, 500);
+  }
+
+  return c.json({ msg: "Placed sticker" }, 200);
 });
 
 stickers.post("/remove", async (c) => {
