@@ -1,13 +1,30 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import type { Route } from "./+types/newhabit";
-import { Link, useNavigate } from "react-router";
+import { Await, Link, useLoaderData, useNavigate } from "react-router";
 import type { CreateHabitFormData, Habit } from "@shared/types";
+import StickerPackSelection from "~/ui/StickerPackSelection";
 
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "New Habit" },
     { name: "description", content: "Start a new habit" },
   ];
+}
+
+async function getStickerPackSummaries(cookie: string) {
+  const res = await fetch(`${process.env.API_URL!}api/sticker-packs/summary`, {
+    headers: { cookie },
+  });
+  const data = (await res.json()).data;
+  return data;
+}
+
+export function loader({ request }: Route.LoaderArgs) {
+  return {
+    stickerPackSummaries: getStickerPackSummaries(
+      request.headers.get("cookie") ?? "",
+    ),
+  };
 }
 
 const url = "api/habits";
@@ -31,9 +48,15 @@ export default function NewHabit() {
   const [habitTypeKey, setHabitTypeKey] = useState<HabitTypeKey>(
     Object.keys(HabitTypeLookup)[0] as HabitTypeKey,
   );
+  const [stickerPackId, setStickerPackId] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
+  const { stickerPackSummaries } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
+
+  function updateStickerPackId(id: string) {
+    setErrorMsg(null);
+    setStickerPackId(id);
+  }
 
   return (
     <div className="p-4">
@@ -43,12 +66,17 @@ export default function NewHabit() {
         onSubmit={async (e) => {
           e.preventDefault();
 
+          if (stickerPackId === "") {
+            setErrorMsg(`Select a Sticker Pack`);
+            return;
+          }
+
           const habitType = HabitTypeLookup[habitTypeKey];
           const body: CreateHabitFormData = {
             description: habitDescription,
             interval: habitType.interval,
             reps: habitType.reps,
-            current_sticker_pack_id: "15c8528c-99ae-484f-9392-dc75ba6e6f2d", //TODO: implement sticker pack selection
+            current_sticker_pack_id: stickerPackId,
           };
           const result = await fetch(url, {
             method: "POST",
@@ -91,10 +119,17 @@ export default function NewHabit() {
             ))}
           </select>
         </div>
-        <div className="flex flex-col gap-4 w-full max-w-sm">
-          <p>Sticker Pack</p>
-          {/* TODO: implement sticker pack selection */}
-        </div>
+        <Suspense fallback={<p>Loading...</p>}>
+          <Await resolve={stickerPackSummaries}>
+            {(stickerPackSummaries) => (
+              <StickerPackSelection
+                summaries={stickerPackSummaries}
+                handleClick={updateStickerPackId}
+              />
+            )}
+          </Await>
+        </Suspense>
+
         {errorMsg && (
           <p className="error-msg text-red-600 text-sm">{errorMsg}</p>
         )}

@@ -41,3 +41,15 @@ export type HabitSummary = Pick<
   // >;
   stickers: StickerSummary[];
 };
+
+export type StickerPackSummary = {
+  id: string;
+  name: string;
+  description: string;
+  stickers: {
+    sticker_id: string;
+    imageUrl: string;
+    sticker_name: string;
+    pack_id: string;
+  }[];
+};

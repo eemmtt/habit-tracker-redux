@@ -61,6 +61,8 @@ export const table_habits = pgTable("habits", {
 
 export const table_sticker_packs = pgTable("stickerPacks", {
   id: uuid().primaryKey().defaultRandom(),
+  name: varchar({ length: 128 }).notNull().unique(),
+  description: varchar({ length: 512 }).notNull(),
 });
 
 export const table_stickers = pgTable("stickers", {
@@ -70,7 +72,7 @@ export const table_stickers = pgTable("stickers", {
   sticker_pack_id: uuid()
     .notNull()
     .references(() => table_sticker_packs.id),
-  imageUrl: varchar({ length: 2048 }),
+  imageUrl: varchar({ length: 2048 }).notNull(),
 });
 
 export const stickerVariantEnum = pgEnum("stickerVariant", ["Normal", "Foil"]);

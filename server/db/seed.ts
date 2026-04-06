@@ -18,7 +18,10 @@ async function main() {
   await db.insert(table_milestones).values(milestones);
 
   await db.delete(table_sticker_packs);
-  await db.insert(table_sticker_packs).values([{}, {}, {}]);
+  await db.insert(table_sticker_packs).values([
+    { name: "test", description: "Test sticker pack" },
+    { name: "Ichabod", description: "He's just a little tiny man" },
+  ]);
 }
 
 main();
