@@ -30,6 +30,7 @@ function StickerSpot({
   label,
   sticker,
   date,
+  row_idx,
   placeSticker,
   removeSticker,
 }: {
@@ -37,7 +38,8 @@ function StickerSpot({
   label: number;
   sticker: StickerSummary | undefined;
   date: string;
-  placeSticker: (d: string) => Promise<void>;
+  row_idx: number;
+  placeSticker: (d: string, idx: number) => Promise<void>;
   removeSticker: (id: string) => Promise<void>;
 }) {
   const buttonClassesActive =
@@ -68,7 +70,7 @@ function StickerSpot({
         <div
           className="relative"
           id={date}
-          onClick={active ? () => placeSticker(date) : () => {}}
+          onClick={active ? () => placeSticker(date, row_idx) : () => {}}
         >
           <button
             className={active ? buttonClassesActive : buttonClassesInActive}
@@ -83,11 +85,13 @@ function StickerSpot({
 
 function StickerArea({
   stickers,
+  row_idx,
   placeSticker,
   removeSticker,
 }: {
-  stickers: StickersByPlacedAt;
-  placeSticker: (d: string) => Promise<void>;
+  stickers: StickerSummary[];
+  row_idx: number;
+  placeSticker: (d: string, idx: number) => Promise<void>;
   removeSticker: (id: string) => Promise<void>;
 }) {
   const weekDates = getWeekAsArray();
@@ -101,7 +105,12 @@ function StickerArea({
           label={idx + 1}
           date={d}
           active={d === today}
-          sticker={stickers.get(d)}
+          sticker={
+            stickers.filter(
+              (v) => v.row_idx === row_idx && v.placed_at === d,
+            )[0]
+          }
+          row_idx={row_idx}
           placeSticker={placeSticker}
           removeSticker={removeSticker}
         />
@@ -114,19 +123,14 @@ export function HabitCard({ data }: { data: HabitSummary }) {
   const { revalidate } = useRevalidator();
 
   const units = data.interval === "weekly" ? "wk" : "d";
-  const stickersByPlacedAt: StickersByPlacedAt = new Map(
-    data.stickers.map(({ placed_at, ...i }) => [
-      placed_at,
-      { placed_at, ...i },
-    ]),
-  );
 
-  async function placeSticker(d: string) {
+  async function placeSticker(date: string, idx: number) {
     console.log("placing sticker");
     const body = JSON.stringify({
       habit_id: data.id,
       pack_id: data.current_sticker_pack_id,
-      placed_at: d,
+      placed_at: date,
+      row_idx: idx,
     });
 
     const res = await fetch("/api/stickers/place", {
@@ -138,6 +142,9 @@ export function HabitCard({ data }: { data: HabitSummary }) {
     });
     if (res.ok) {
       revalidate();
+    } else {
+      const body = await res.json();
+      console.warn(body.msg);
     }
   }
 
@@ -168,8 +175,7 @@ export function HabitCard({ data }: { data: HabitSummary }) {
         <Stat
           classNames={{
             root: "grow min-w-0",
-            label: "rounded-tl",
-            description: "",
+            label: "rounded-tl border-r-2 border-background",
           }}
           label="HABIT DESCRIPTION"
           description={data.description}
@@ -185,12 +191,12 @@ export function HabitCard({ data }: { data: HabitSummary }) {
       </div>
       <div className="flex flex-row">
         <Stat
-          classNames={{ root: "grow" }}
+          classNames={{ root: "grow", label: "border-r-2 border-background" }}
           label="HABIT TYPE"
           description={data.type_str}
         />
         <Stat
-          classNames={{ root: "grow" }}
+          classNames={{ root: "grow", label: "border-r-2 border-background" }}
           label="STREAK"
           description={data.current_streak.toString()}
           units={units}
@@ -201,11 +207,15 @@ export function HabitCard({ data }: { data: HabitSummary }) {
           description={data.next_ms}
         />
       </div>
-      <StickerArea
-        stickers={stickersByPlacedAt}
-        placeSticker={placeSticker}
-        removeSticker={removeSticker}
-      />
+      {Array.from({ length: data.reps }, (_, idx) => idx).map((i) => (
+        <StickerArea
+          key={i}
+          row_idx={i}
+          stickers={data.stickers}
+          placeSticker={placeSticker}
+          removeSticker={removeSticker}
+        />
+      ))}
     </div>
   );
 }

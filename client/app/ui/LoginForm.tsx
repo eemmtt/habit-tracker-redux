@@ -59,6 +59,7 @@ export default function LoginForm() {
             setEmail(e.target.value);
           }}
           required
+          suppressHydrationWarning
         ></input>
       </div>
       {form === "verify" && (
@@ -77,6 +78,7 @@ export default function LoginForm() {
               setCode(e.target.value);
             }}
             required
+            suppressHydrationWarning
           ></input>
         </div>
       )}

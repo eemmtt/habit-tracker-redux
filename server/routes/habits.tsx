@@ -80,6 +80,7 @@ habits.get("/summary", async (c) => {
       sticker_id: table_stickers.id,
       imageUrl: table_stickers.imageUrl,
       sticker_name: table_stickers.name,
+      row_idx: table_stickers_placed.row_idx,
     })
     .from(table_stickers_placed)
     .innerJoin(

@@ -50,6 +50,7 @@ export default function SignupForm() {
             setEmail(e.target.value);
           }}
           required
+          suppressHydrationWarning
         ></input>
       </div>
       <div className="flex flex-col gap-1">
@@ -64,6 +65,7 @@ export default function SignupForm() {
             setEmailConfirmed(e.target.value);
           }}
           required
+          suppressHydrationWarning
         ></input>
       </div>
       <div className="flex flex-col gap-1">
@@ -78,6 +80,7 @@ export default function SignupForm() {
             setInviteCode(e.target.value);
           }}
           required
+          suppressHydrationWarning
         ></input>
       </div>
       {errorMsg && <p className="error-msg text-red-600 text-sm">{errorMsg}</p>}

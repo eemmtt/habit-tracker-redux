@@ -10,7 +10,8 @@ import {
   table_stickers,
   table_stickers_placed,
 } from "../db/schema";
-import { and, eq, isNotNull, sql } from "drizzle-orm";
+import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
+import { dateToStr } from "../../shared/helpers";
 
 const stickers = new Hono<{ Variables: CtxVariables }>();
 
@@ -26,7 +27,7 @@ stickers.post("/place", async (c) => {
       },
       400,
     );
-  const { habit_id, placed_at, pack_id } = validated.data;
+  const { habit_id, placed_at, pack_id, row_idx } = validated.data;
   const user_id = c.get("user_id");
 
   //if placed sticker exists but was deleted, restore it and increment streak
@@ -40,6 +41,7 @@ stickers.post("/place", async (c) => {
         .where(
           and(
             eq(table_stickers_placed.habit_id, habit_id),
+            eq(table_stickers_placed.row_idx, row_idx),
             sql`${table_stickers_placed.placed_at}::date = ${placed_at}::date`,
             isNotNull(table_stickers_placed.deleted_at),
           ),
@@ -49,13 +51,31 @@ stickers.post("/place", async (c) => {
         throw new Error("No sticker to restore");
       }
 
-      await tx
-        .update(table_habits)
-        .set({
-          current_streak: sql`${table_habits.current_streak} + 1`,
-          total_completed: sql`${table_habits.total_completed} + 1`,
-        })
+      const [{ count }] = await tx
+        .select({ count: sql<number>`count(*)::int` })
+        .from(table_stickers_placed)
+        .where(
+          and(
+            eq(table_stickers_placed.habit_id, habit_id),
+            sql`${table_stickers_placed.placed_at}::date = ${placed_at}::date`,
+            isNull(table_stickers_placed.deleted_at),
+          ),
+        );
+
+      const [habit] = await tx
+        .select({ reps: table_habits.reps })
+        .from(table_habits)
         .where(eq(table_habits.id, habit_id));
+
+      if (count === habit.reps) {
+        await tx
+          .update(table_habits)
+          .set({
+            current_streak: sql`${table_habits.current_streak} + 1`,
+            total_completed: sql`${table_habits.total_completed} + 1`,
+          })
+          .where(eq(table_habits.id, habit_id));
+      }
     });
   } catch (error) {}
 
@@ -81,15 +101,34 @@ stickers.post("/place", async (c) => {
         habit_id: habit_id,
         sticker_id: stickers[rIdx].id,
         variant: "Normal",
+        row_idx: row_idx,
       });
 
-      await tx
-        .update(table_habits)
-        .set({
-          current_streak: sql`${table_habits.current_streak} + 1`,
-          total_completed: sql`${table_habits.total_completed} + 1`,
-        })
+      const [{ count }] = await tx
+        .select({ count: sql<number>`count(*)::int` })
+        .from(table_stickers_placed)
+        .where(
+          and(
+            eq(table_stickers_placed.habit_id, habit_id),
+            sql`${table_stickers_placed.placed_at}::date = CURRENT_DATE`,
+            isNull(table_stickers_placed.deleted_at),
+          ),
+        );
+
+      const [habit] = await tx
+        .select({ reps: table_habits.reps })
+        .from(table_habits)
         .where(eq(table_habits.id, habit_id));
+
+      if (count === habit.reps) {
+        await tx
+          .update(table_habits)
+          .set({
+            current_streak: sql`${table_habits.current_streak} + 1`,
+            total_completed: sql`${table_habits.total_completed} + 1`,
+          })
+          .where(eq(table_habits.id, habit_id));
+      }
     });
   } catch (error) {
     return c.json(
@@ -122,17 +161,41 @@ stickers.post("/remove", async (c) => {
         .update(table_stickers_placed)
         .set({ deleted_at: new Date() })
         .where(eq(table_stickers_placed.id, id))
-        .returning({ id: table_stickers_placed.id });
+        .returning({
+          id: table_stickers_placed.id,
+          placed_at: table_stickers_placed.placed_at,
+        });
 
-      await tx
-        .update(table_habits)
-        .set({
-          current_streak: sql`${table_habits.current_streak} - 1`,
-          total_completed: sql`${table_habits.total_completed} - 1`,
-        })
+      if (result.length === 0) return;
+
+      const [{ count }] = await tx
+        .select({ count: sql<number>`count(*)::int` })
+        .from(table_stickers_placed)
+        .where(
+          and(
+            eq(table_stickers_placed.habit_id, habit_id),
+            sql`${table_stickers_placed.placed_at}::date = ${dateToStr(result[0].placed_at)}::date`,
+            isNull(table_stickers_placed.deleted_at),
+          ),
+        );
+
+      const [habit] = await tx
+        .select({ reps: table_habits.reps })
+        .from(table_habits)
         .where(eq(table_habits.id, habit_id));
+
+      if (count === habit.reps - 1) {
+        await tx
+          .update(table_habits)
+          .set({
+            current_streak: sql`${table_habits.current_streak} - 1`,
+            total_completed: sql`${table_habits.total_completed} - 1`,
+          })
+          .where(eq(table_habits.id, habit_id));
+      }
     });
   } catch (error) {
+    console.log(error);
     return c.json(
       { msg: "Failed to remove placed sticker and decrement streak" },
       500,

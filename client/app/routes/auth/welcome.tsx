@@ -13,21 +13,25 @@ export function meta({}: Route.MetaArgs) {
 export default function Welcome() {
   const [formState, setFormState] = useState<"login" | "register">("login");
   return (
-    <>
-      <h1>Welcome</h1>
-      <button
-        className={formState === "login" ? "as-btn selected" : "as-btn"}
-        onClick={() => setFormState("login")}
-      >
-        Login
-      </button>
-      <button
-        className={formState === "register" ? "as-btn selected" : "as-btn"}
-        onClick={() => setFormState("register")}
-      >
-        Register
-      </button>
+    <main className="flex flex-col items-center min-h-screen gap-4 pt-8">
+      <h1>STICKY</h1>
+      <div className="w-75 h-75 border"></div>
+      <h2>Habit Tracker</h2>
+      <div className="flex flex-row">
+        <button
+          className={formState === "login" ? "as-btn selected" : "as-btn"}
+          onClick={() => setFormState("login")}
+        >
+          Login
+        </button>
+        <button
+          className={formState === "register" ? "as-btn selected" : "as-btn"}
+          onClick={() => setFormState("register")}
+        >
+          Register
+        </button>
+      </div>
       {formState === "login" ? <LoginForm /> : <SignupForm />}
-    </>
+    </main>
   );
 }

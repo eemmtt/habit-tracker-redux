@@ -3,6 +3,9 @@ import type { Route } from "./+types/newhabit";
 import { Await, Link, useLoaderData, useNavigate } from "react-router";
 import type { CreateHabitFormData, Habit } from "@shared/types";
 import StickerPackSelection from "~/ui/StickerPackSelection";
+import type { RouteHandle } from "~/types";
+
+export const handle: RouteHandle = { title: "New Habit", parent: "/" };
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -59,8 +62,7 @@ export default function NewHabit() {
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-lg">New Habit</h1>
+    <main className="p-4">
       <form
         className="flex flex-col gap-4 w-full max-w-sm"
         onSubmit={async (e) => {
@@ -143,6 +145,6 @@ export default function NewHabit() {
           </Link>
         </div>
       </form>
-    </div>
+    </main>
   );
 }

@@ -4,6 +4,9 @@ import { Await, Link, useLoaderData } from "react-router";
 import type { HabitSummary } from "@shared/types";
 import { Suspense } from "react";
 import { HabitCard } from "~/ui/HabitCard";
+import type { RouteHandle } from "~/types";
+
+export const handle: RouteHandle = { title: "Dashboard" };
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -29,9 +32,7 @@ export function loader({ request }: Route.LoaderArgs) {
 export default function Dashboard() {
   const { habitSummaries } = useLoaderData<typeof loader>();
   return (
-    <>
-      <h1>Dashboard</h1>
-      <LogoutButton />
+    <main className="flex flex-col center">
       <div className="grid grid-cols-[repeat(auto-fill,minmax(350px,1fr))] gap-4 p-4">
         <Suspense fallback={<p>Loading...</p>}>
           <Await resolve={habitSummaries}>
@@ -46,6 +47,6 @@ export default function Dashboard() {
       <Link to="/new-habit" className="as-btn">
         Start New Habit
       </Link>
-    </>
+    </main>
   );
 }

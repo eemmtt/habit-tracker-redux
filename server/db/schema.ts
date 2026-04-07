@@ -102,8 +102,9 @@ export const table_stickers_placed = pgTable(
     placed_at: timestamp("placed_at").defaultNow().notNull(),
     deleted_at: timestamp("deleted_at"),
     variant: stickerVariantEnum().notNull(),
+    row_idx: integer().notNull().default(0),
   },
-  (t) => [unique().on(t.habit_id, t.placed_at)],
+  (t) => [unique().on(t.habit_id, t.placed_at, t.row_idx)],
 );
 
 export const table_milestones = pgTable("milestones", {

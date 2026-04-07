@@ -43,9 +43,10 @@ export const insertPlacedStickerSchema = createInsertSchema(
       .string()
       .length(10)
       .regex(/^\d{4}-\d{2}-\d{2}$/),
+    row_idx: z.number().int().nonnegative().max(2),
   },
 )
-  .pick({ habit_id: true, placed_at: true })
+  .pick({ habit_id: true, placed_at: true, row_idx: true })
   .extend({
     pack_id: z.uuid(),
   });

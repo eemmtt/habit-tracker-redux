@@ -16,12 +16,13 @@ export type StickerSummary = {
   sticker_placed_id: string;
   placed_at: string;
   variant: "Normal" | "Foil";
+  row_idx: number;
   sticker_id: string;
   imageUrl: string | null;
   sticker_name: string;
 };
 
-export type StickersByPlacedAt = Map<string, StickerSummary>;
+export type StickersByPlacedAt = Map<string, StickerSummary[]>;
 
 export type HabitSummary = Pick<
   Habit,
