@@ -6,7 +6,7 @@ import type {
 import Stat from "./Stat";
 import { act, useState } from "react";
 import { dateToStr } from "@shared/helpers";
-import { useRevalidator } from "react-router";
+import { Link, useRevalidator } from "react-router";
 
 function getWeekAsArray() {
   const today = new Date();
@@ -131,9 +131,13 @@ function StickerArea({
   );
 }
 
-export function HabitCard({ data }: { data: HabitSummary }) {
-  const { revalidate } = useRevalidator();
-
+export function HabitCard({
+  data,
+  handleUpdate,
+}: {
+  data: HabitSummary;
+  handleUpdate: (h: HabitSummary) => void;
+}) {
   const units = data.interval === "weekly" ? "wk" : "d";
 
   async function placeSticker(date: string, idx: number) {
@@ -151,11 +155,11 @@ export function HabitCard({ data }: { data: HabitSummary }) {
       },
       body: body,
     });
+    const resBody = await res.json();
     if (res.ok) {
-      revalidate();
+      handleUpdate(resBody.data);
     } else {
-      const body = await res.json();
-      console.warn(body.msg);
+      console.warn(resBody.msg);
     }
   }
 
@@ -172,60 +176,62 @@ export function HabitCard({ data }: { data: HabitSummary }) {
       },
       body: body,
     });
+    const resBody = await res.json();
     if (res.ok) {
-      revalidate();
+      handleUpdate(resBody.data);
     } else {
-      const body = await res.json();
-      console.log(body.msg);
+      console.log(resBody.msg);
     }
   }
 
-  const stickerAreaClassBase =
+  const stickerAreaClass =
     "grid grid-cols-7 grid-rows-1 items-center w-full gap-2 bg-background rounded-b";
-  const stickerAreaClassSingle = stickerAreaClassBase + " pl-2 pr-2";
+  const stickerAreaClassSingle = stickerAreaClass + " px-2";
   const stickerAreaClassesMulti = [
-    stickerAreaClassBase + " pl-2 pr-8",
-    stickerAreaClassBase + " pl-8 pr-2",
+    stickerAreaClass + " pl-2 pr-8",
+    stickerAreaClass + " pl-8 pr-2",
   ];
 
   return (
     <div className="w-full max-w-100 h-fit rounded bg-background shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] pb-2">
-      <div className="flex flex-row">
-        <Stat
-          classNames={{
-            root: "grow min-w-0",
-            label: "rounded-tl border-r-2 border-background",
-          }}
-          label="HABIT DESCRIPTION"
-          description={data.description}
-        />
-        <Stat
-          classNames={{
-            root: "ml-auto",
-            label: "rounded-tr",
-          }}
-          label="ADH"
-          description={data.adh}
-        />
-      </div>
-      <div className="flex flex-row">
-        <Stat
-          classNames={{ root: "grow", label: "border-r-2 border-background" }}
-          label="HABIT TYPE"
-          description={data.type_str}
-        />
-        <Stat
-          classNames={{ root: "grow", label: "border-r-2 border-background" }}
-          label="STREAK"
-          description={data.current_streak.toString()}
-          units={units}
-        />
-        <Stat
-          classNames={{ root: "grow" }}
-          label="NEXT MS"
-          description={data.next_ms}
-        />
-      </div>
+      <Link to={`habit/${data.id}`}>
+        <div className="flex flex-row">
+          <Stat
+            classNames={{
+              root: "grow min-w-0",
+              label: "rounded-tl border-r-2 border-background",
+            }}
+            label="HABIT DESCRIPTION"
+            description={data.description}
+          />
+          <Stat
+            classNames={{
+              root: "ml-auto",
+              label: "rounded-tr",
+            }}
+            label="ADH"
+            description={data.adh}
+          />
+        </div>
+        <div className="flex flex-row">
+          <Stat
+            classNames={{ root: "grow", label: "border-r-2 border-background" }}
+            label="HABIT TYPE"
+            description={data.type_str}
+          />
+          <Stat
+            classNames={{ root: "grow", label: "border-r-2 border-background" }}
+            label="STREAK"
+            description={data.current_streak.toString()}
+            units={units}
+          />
+          <Stat
+            classNames={{ root: "grow" }}
+            label="NEXT MS"
+            description={data.next_ms}
+          />
+        </div>
+      </Link>
       {Array.from({ length: data.reps }, (_, idx) => idx).map((i) => (
         <StickerArea
           key={i}

@@ -12,7 +12,7 @@ import { and, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 
 import type { HabitSummary } from "../../shared/types";
 import { dateToStr } from "../../shared/helpers";
-import { raw } from "hono/html";
+import { getAdh, getNextMs, getTypeStr } from "../lib/habits";
 
 const habits = new Hono<{ Variables: CtxVariables }>();
 
@@ -99,48 +99,6 @@ habits.get("/summary", async (c) => {
     );
 
   const milestones = await db.select().from(table_milestones);
-
-  function getNextMs(
-    streak: number,
-    milestones: {
-      id: number;
-      num_days: number;
-      label: string;
-    }[],
-  ) {
-    if (streak < milestones[0].num_days) return milestones[0];
-    for (let i = 0; i < milestones.length; i++) {
-      if (streak > milestones[i].num_days) return milestones[i];
-    }
-    return milestones[milestones.length - 1];
-  }
-
-  function getTypeStr(interval: string, reps: number) {
-    const joined = interval + " " + reps.toString();
-
-    switch (joined) {
-      case "daily 1":
-        return "Once Daily";
-      case "daily 2":
-        return "Twice Daily";
-      case "weekly 1":
-        return "Once Weekly";
-      default:
-        return `${reps} ${interval}`;
-    }
-  }
-
-  function getAdh(started_at: Date, total_completed: number): string {
-    const daysElapsed = Math.round(
-      (new Date().getUTCMilliseconds() - started_at.getUTCMilliseconds()) /
-        (24 * 60 * 60 * 1000),
-    );
-    if (daysElapsed === 0) {
-      return total_completed > 0 ? "100%" : "0%";
-    }
-    const rawAdh = (total_completed / daysElapsed) * 100;
-    return `${rawAdh.toPrecision(3)}%`;
-  }
 
   const stickersByHabitMap = Map.groupBy(stickers, (s) => s.habitId);
   const summary: HabitSummary[] = habits

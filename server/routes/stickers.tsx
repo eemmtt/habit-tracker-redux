@@ -12,6 +12,8 @@ import {
 } from "../db/schema";
 import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { dateToStr } from "../../shared/helpers";
+import { getHabitSummary } from "../lib/habits";
+import { HabitSummary } from "../../shared/types";
 
 const stickers = new Hono<{ Variables: CtxVariables }>();
 
@@ -80,7 +82,14 @@ stickers.post("/place", async (c) => {
   } catch (error) {}
 
   if (stickerUpdateRes.length > 0) {
-    return c.json({ msg: "Sticker placed" }, 200);
+    const summary = await getHabitSummary(user_id, habit_id);
+    if (summary.status !== 200)
+      return c.json(
+        { msg: "Sticker placed but could not retrieve updated HabitSummary" },
+        500,
+      );
+
+    return c.json({ msg: "Sticker placed", data: summary.data }, 200);
   }
 
   //else
@@ -136,13 +145,19 @@ stickers.post("/place", async (c) => {
       500,
     );
   }
+  const summary = await getHabitSummary(user_id, habit_id);
+  if (summary.status !== 200)
+    return c.json(
+      { msg: "Sticker placed but could not retrieve updated HabitSummary" },
+      500,
+    );
 
-  return c.json({ msg: "Placed sticker" }, 200);
+  return c.json({ msg: "Placed sticker", data: summary.data }, 200);
 });
 
 stickers.post("/remove", async (c) => {
   /* Remove placed sticker */
-
+  const user_id = c.get("user_id");
   const payload = await c.req.json();
   const validated = await removePlacedStickerSchema.safeParse(payload);
   if (!validated.success)
@@ -202,11 +217,17 @@ stickers.post("/remove", async (c) => {
     );
   }
 
-  if (result.length > 0) {
-    return c.json({ msg: "Sticker removed" }, 200);
-  } else {
+  if (result.length === 0)
     return c.json({ msg: "Sticker not found to remove" }, 404);
-  }
+
+  const summary = await getHabitSummary(user_id, habit_id);
+  if (summary.status !== 200)
+    return c.json(
+      { msg: "Sticker removed but could not retrieve updated HabitSummary" },
+      500,
+    );
+
+  return c.json({ msg: "Sticker removed", data: summary.data }, 200);
 });
 
 export default stickers;
