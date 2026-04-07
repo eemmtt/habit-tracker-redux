@@ -95,7 +95,7 @@ export default function NewHabit() {
           <textarea
             className="border"
             minLength={8}
-            maxLength={255}
+            maxLength={72}
             id="input-habit-description"
             value={habitDescription}
             onChange={(e) => setHabitDescription(e.target.value)}

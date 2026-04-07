@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import { check } from "drizzle-orm/pg-core";
 import {
   boolean,
   integer,
@@ -41,23 +42,31 @@ export const table_verification_codes = pgTable("verificationCodes", {
 
 export const habitTypeEnum = pgEnum("habitType", ["daily", "weekly"]);
 
-export const table_habits = pgTable("habits", {
-  id: uuid().primaryKey().defaultRandom(),
-  user_id: uuid()
-    .notNull()
-    .references(() => table_users.id),
-  description: varchar({ length: 255 }).notNull(),
-  started_at: timestamp("started_at").defaultNow().notNull(),
-  deleted_at: timestamp("deleted_at"),
-  interval: habitTypeEnum().notNull(),
-  reps: integer().notNull().default(1),
-  current_sticker_pack_id: uuid()
-    .notNull()
-    .references(() => table_sticker_packs.id),
-  current_streak: integer().notNull().default(0),
-  max_streak: integer().notNull().default(0),
-  last_completed_at: timestamp("last_completed_at"),
-});
+export const table_habits = pgTable(
+  "habits",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    user_id: uuid()
+      .notNull()
+      .references(() => table_users.id),
+    description: varchar({ length: 72 }).notNull(),
+    started_at: timestamp("started_at").defaultNow().notNull(),
+    deleted_at: timestamp("deleted_at"),
+    interval: habitTypeEnum().notNull(),
+    reps: integer().notNull().default(1),
+    current_sticker_pack_id: uuid()
+      .notNull()
+      .references(() => table_sticker_packs.id),
+    current_streak: integer().notNull().default(0),
+    max_streak: integer().notNull().default(0),
+    last_completed_at: timestamp("last_completed_at"),
+    total_completed: integer().notNull().default(0),
+  },
+  (t) => [
+    check("positive streak", sql`${t.current_streak} >= 0`),
+    check("positive completed", sql`${t.total_completed} >= 0`),
+  ],
+);
 
 export const table_sticker_packs = pgTable("stickerPacks", {
   id: uuid().primaryKey().defaultRandom(),

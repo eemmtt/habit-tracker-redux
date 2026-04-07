@@ -11,6 +11,7 @@ import { z } from "zod";
 export const insertHabitSchema = createInsertSchema(table_habits, {
   reps: z.number().int().positive().max(2),
   current_sticker_pack_id: z.uuid(),
+  description: z.string().max(72),
 }).pick({
   description: true,
   interval: true,

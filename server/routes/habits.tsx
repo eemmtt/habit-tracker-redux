@@ -12,6 +12,7 @@ import { and, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 
 import type { HabitSummary } from "../../shared/types";
 import { dateToStr } from "../../shared/helpers";
+import { raw } from "hono/html";
 
 const habits = new Hono<{ Variables: CtxVariables }>();
 
@@ -59,6 +60,8 @@ habits.get("/summary", async (c) => {
       interval: table_habits.interval,
       reps: table_habits.reps,
       current_sticker_pack_id: table_habits.current_sticker_pack_id,
+      started_at: table_habits.started_at,
+      total_completed: table_habits.total_completed,
     })
     .from(table_habits)
     .where(
@@ -126,24 +129,41 @@ habits.get("/summary", async (c) => {
     }
   }
 
-  const stickersByHabitMap = Map.groupBy(stickers, (s) => s.habitId);
-  const summary: HabitSummary[] = habits.map((h) => {
-    const habitStickers = (stickersByHabitMap.get(h.id) ?? []).map(
-      ({ habitId, placed_at, ...s }) => {
-        return {
-          ...s,
-          placed_at: dateToStr(placed_at),
-        };
-      },
+  function getAdh(started_at: Date, total_completed: number): string {
+    const daysElapsed = Math.round(
+      (new Date().getUTCMilliseconds() - started_at.getUTCMilliseconds()) /
+        (24 * 60 * 60 * 1000),
     );
-    return {
-      ...h,
-      type_str: getTypeStr(h.interval, h.reps),
-      next_ms: getNextMs(h.current_streak, milestones).label,
-      adh: "",
-      stickers: habitStickers,
-    };
-  });
+    if (daysElapsed === 0) {
+      return total_completed > 0 ? "100%" : "0%";
+    }
+    const rawAdh = (total_completed / daysElapsed) * 100;
+    return `${rawAdh.toPrecision(3)}%`;
+  }
+
+  const stickersByHabitMap = Map.groupBy(stickers, (s) => s.habitId);
+  const summary: HabitSummary[] = habits
+    .map((h) => {
+      const habitStickers = (stickersByHabitMap.get(h.id) ?? []).map(
+        ({ habitId, placed_at, ...s }) => {
+          return {
+            ...s,
+            placed_at: dateToStr(placed_at),
+          };
+        },
+      );
+      return {
+        ...h,
+        type_str: getTypeStr(h.interval, h.reps),
+        next_ms: getNextMs(h.current_streak, milestones).label,
+        adh: getAdh(h.started_at, h.total_completed),
+        stickers: habitStickers,
+      };
+    })
+    .sort(
+      (a, b) =>
+        b.started_at.getUTCMilliseconds() - a.started_at.getUTCMilliseconds(),
+    );
 
   return c.json(
     {

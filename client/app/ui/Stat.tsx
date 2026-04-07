@@ -11,7 +11,7 @@ export default function Stat({
   units?: "d" | "wk" | "mo";
 }) {
   return (
-    <dl className={classNames?.root}>
+    <dl className={"flex flex-col " + classNames?.root}>
       <dt
         className={
           "text-sm text-primary bg-header-bg pl-2 pr-2 pt-0.5 pb-0.5 " +
@@ -22,7 +22,8 @@ export default function Stat({
       </dt>
       <dd
         className={
-          "text-base text-primary bg-background p-2 " + classNames?.description
+          "text-base text-primary bg-background p-2 wrap-break-word grow " +
+          classNames?.description
         }
       >
         {description + (units ? ` ${units}` : "")}

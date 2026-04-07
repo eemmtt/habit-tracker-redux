@@ -122,6 +122,7 @@ export function HabitCard({ data }: { data: HabitSummary }) {
   );
 
   async function placeSticker(d: string) {
+    console.log("placing sticker");
     const body = JSON.stringify({
       habit_id: data.id,
       pack_id: data.current_sticker_pack_id,
@@ -165,17 +166,21 @@ export function HabitCard({ data }: { data: HabitSummary }) {
     <div className="w-full max-w-100 h-fit rounded bg-amber-200 shadow-[0_4px_4px_0_rgba(0,0,0,0.25)]">
       <div className="flex flex-row">
         <Stat
-          classNames={{ root: "grow", label: "rounded-tl" }}
+          classNames={{
+            root: "grow min-w-0",
+            label: "rounded-tl",
+            description: "",
+          }}
           label="HABIT DESCRIPTION"
           description={data.description}
         />
         <Stat
-          classNames={{ root: "ml-auto", label: "rounded-tr" }}
+          classNames={{
+            root: "ml-auto",
+            label: "rounded-tr",
+          }}
           label="ADH"
-          description={
-            // `${adherence.toPrecision(3)}%`
-            `100%`
-          }
+          description={data.adh}
         />
       </div>
       <div className="flex flex-row">

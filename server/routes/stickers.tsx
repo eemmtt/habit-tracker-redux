@@ -45,10 +45,16 @@ stickers.post("/place", async (c) => {
           ),
         )
         .returning({ id: table_stickers_placed.id });
+      if (stickerUpdateRes.length === 0) {
+        throw new Error("No sticker to restore");
+      }
 
       await tx
         .update(table_habits)
-        .set({ current_streak: sql`${table_habits.current_streak} + 1` })
+        .set({
+          current_streak: sql`${table_habits.current_streak} + 1`,
+          total_completed: sql`${table_habits.total_completed} + 1`,
+        })
         .where(eq(table_habits.id, habit_id));
     });
   } catch (error) {}
@@ -79,7 +85,10 @@ stickers.post("/place", async (c) => {
 
       await tx
         .update(table_habits)
-        .set({ current_streak: sql`${table_habits.current_streak} + 1` })
+        .set({
+          current_streak: sql`${table_habits.current_streak} + 1`,
+          total_completed: sql`${table_habits.total_completed} + 1`,
+        })
         .where(eq(table_habits.id, habit_id));
     });
   } catch (error) {
@@ -117,7 +126,10 @@ stickers.post("/remove", async (c) => {
 
       await tx
         .update(table_habits)
-        .set({ current_streak: sql`${table_habits.current_streak} - 1` })
+        .set({
+          current_streak: sql`${table_habits.current_streak} - 1`,
+          total_completed: sql`${table_habits.total_completed} - 1`,
+        })
         .where(eq(table_habits.id, habit_id));
     });
   } catch (error) {
