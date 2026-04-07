@@ -119,10 +119,7 @@ habits.get("/summary", async (c) => {
         stickers: habitStickers,
       };
     })
-    .sort(
-      (a, b) =>
-        b.started_at.getUTCMilliseconds() - a.started_at.getUTCMilliseconds(),
-    );
+    .sort((a, b) => a.started_at.getTime() - b.started_at.getTime());
 
   return c.json(
     {
