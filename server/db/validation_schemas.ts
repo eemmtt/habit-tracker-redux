@@ -53,7 +53,9 @@ export const removePlacedStickerSchema = createSelectSchema(
   table_stickers_placed,
   {
     id: z.uuid(),
+    habit_id: z.uuid(),
   },
 ).pick({
   id: true,
+  habit_id: true,
 });

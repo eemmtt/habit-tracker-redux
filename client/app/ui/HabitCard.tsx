@@ -61,7 +61,7 @@ function StickerSpot({
           <img
             src={sticker.imageUrl ? sticker.imageUrl + "_256px.webp" : ""}
             alt={sticker.sticker_name}
-            className="absolute left-0 top-0 w-16 h-16 cursor-pointer"
+            className="absolute left-0 top-0 w-full cursor-pointer"
           ></img>
         </div>
       ) : (
@@ -98,7 +98,7 @@ function StickerArea({
       {weekDates.map((d, idx) => (
         <StickerSpot
           key={d}
-          label={idx}
+          label={idx + 1}
           date={d}
           active={d === today}
           sticker={stickers.get(d)}
@@ -141,9 +141,9 @@ export function HabitCard({ data }: { data: HabitSummary }) {
   }
 
   async function removeSticker(id: string) {
-    console.log("remove sticker", id);
     const body = JSON.stringify({
       id: id,
+      habit_id: data.id,
     });
 
     const res = await fetch("/api/stickers/remove", {
@@ -174,7 +174,7 @@ export function HabitCard({ data }: { data: HabitSummary }) {
           label="ADH"
           description={
             // `${adherence.toPrecision(3)}%`
-            "100"
+            `100%`
           }
         />
       </div>
