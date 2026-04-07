@@ -84,21 +84,33 @@ function StickerSpot({
 }
 
 function StickerArea({
+  classes,
   stickers,
   row_idx,
   placeSticker,
   removeSticker,
 }: {
+  classes: { root: string };
   stickers: StickerSummary[];
   row_idx: number;
+  num_rows: number;
   placeSticker: (d: string, idx: number) => Promise<void>;
   removeSticker: (id: string) => Promise<void>;
 }) {
   const weekDates = getWeekAsArray();
   const today = dateToStr(new Date());
 
+  const classNames =
+    "grid grid-cols-7 grid-rows-1 items-center w-full gap-2 bg-background rounded-b";
+
   return (
-    <div className="grid grid-cols-7 grid-rows-1 items-center w-full gap-2 p-2 bg-background rounded-b">
+    <div
+      className={classes.root}
+      //   row_idx % 2 === 0
+      //     ? classNames + " pl-2 pr-8"
+      //     : classNames + " pr-2 pl-8"
+      // }
+    >
       {weekDates.map((d, idx) => (
         <StickerSpot
           key={d}
@@ -125,7 +137,6 @@ export function HabitCard({ data }: { data: HabitSummary }) {
   const units = data.interval === "weekly" ? "wk" : "d";
 
   async function placeSticker(date: string, idx: number) {
-    console.log("placing sticker");
     const body = JSON.stringify({
       habit_id: data.id,
       pack_id: data.current_sticker_pack_id,
@@ -169,8 +180,16 @@ export function HabitCard({ data }: { data: HabitSummary }) {
     }
   }
 
+  const stickerAreaClassBase =
+    "grid grid-cols-7 grid-rows-1 items-center w-full gap-2 bg-background rounded-b";
+  const stickerAreaClassSingle = stickerAreaClassBase + " pl-2 pr-2";
+  const stickerAreaClassesMulti = [
+    stickerAreaClassBase + " pl-2 pr-8",
+    stickerAreaClassBase + " pl-8 pr-2",
+  ];
+
   return (
-    <div className="w-full max-w-100 h-fit rounded bg-amber-200 shadow-[0_4px_4px_0_rgba(0,0,0,0.25)]">
+    <div className="w-full max-w-100 h-fit rounded bg-background shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] pb-2">
       <div className="flex flex-row">
         <Stat
           classNames={{
@@ -211,7 +230,14 @@ export function HabitCard({ data }: { data: HabitSummary }) {
         <StickerArea
           key={i}
           row_idx={i}
+          num_rows={data.reps}
           stickers={data.stickers}
+          classes={{
+            root:
+              data.reps === 1
+                ? stickerAreaClassSingle
+                : stickerAreaClassesMulti[i % 2],
+          }}
           placeSticker={placeSticker}
           removeSticker={removeSticker}
         />
