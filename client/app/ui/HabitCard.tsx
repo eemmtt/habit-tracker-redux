@@ -43,7 +43,7 @@ function StickerSpot({
   removeSticker: (id: string) => void;
 }) {
   const buttonClassesActive =
-    "border rounded-full aspect-square w-full cursor-pointer hover:bg-amber-50";
+    "border border-primary text-primary rounded-full aspect-square w-full cursor-pointer hover:bg-amber-50";
   const buttonClassesInActive =
     "border rounded-full aspect-square w-full border-inactive text-inactive";
 
@@ -100,17 +100,8 @@ function StickerArea({
   const weekDates = getWeekAsArray();
   const today = dateToStr(new Date());
 
-  const classNames =
-    "grid grid-cols-7 grid-rows-1 items-center w-full gap-2 bg-background rounded-b";
-
   return (
-    <div
-      className={classes.root}
-      //   row_idx % 2 === 0
-      //     ? classNames + " pl-2 pr-8"
-      //     : classNames + " pr-2 pl-8"
-      // }
-    >
+    <div className={classes.root}>
       {weekDates.map((d, idx) => (
         <StickerSpot
           key={d}
@@ -172,7 +163,7 @@ export function HabitCard({
   }
 
   const stickerAreaClass =
-    "grid grid-cols-7 grid-rows-1 items-center w-full gap-2 bg-background rounded-b";
+    "grid grid-cols-7 grid-rows-1 items-center w-full gap-2 bg-card-bg rounded-b";
   const stickerAreaClassSingle = stickerAreaClass + " px-2";
   const stickerAreaClassesMulti = [
     stickerAreaClass + " pl-2 pr-8",
@@ -180,13 +171,13 @@ export function HabitCard({
   ];
 
   return (
-    <div className="w-full max-w-100 h-fit rounded bg-background shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] pb-2">
+    <div className="w-full max-w-100 h-fit rounded bg-card-bg shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] pb-2">
       <Link to={`habit/${data.id}`}>
         <div className="flex flex-row">
           <Stat
             classNames={{
               root: "grow min-w-0",
-              label: "rounded-tl border-r-2 border-background",
+              label: "rounded-tl border-r-2 border-card-bg",
             }}
             label="HABIT DESCRIPTION"
             description={data.description}
@@ -202,12 +193,12 @@ export function HabitCard({
         </div>
         <div className="flex flex-row">
           <Stat
-            classNames={{ root: "grow", label: "border-r-2 border-background" }}
+            classNames={{ root: "grow", label: "border-r-2 border-card-bg" }}
             label="HABIT TYPE"
             description={data.type_str}
           />
           <Stat
-            classNames={{ root: "grow", label: "border-r-2 border-background" }}
+            classNames={{ root: "grow", label: "border-r-2 border-card-bg" }}
             label="STREAK"
             description={data.current_streak.toString()}
             units={units}

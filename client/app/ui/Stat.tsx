@@ -22,7 +22,7 @@ export default function Stat({
       </dt>
       <dd
         className={
-          "text-base text-primary bg-background p-2 pt-1 wrap-break-word grow " +
+          "text-base text-primary bg-card-bg p-2 pt-1 wrap-break-word grow " +
           classNames?.description
         }
       >
