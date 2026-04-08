@@ -45,10 +45,7 @@ async function getStickerPackSummaries(cookie: string) {
   const res = await fetch(`${process.env.API_URL!}api/sticker-packs/summary`, {
     headers: { cookie },
   });
-  if (!res.ok)
-    throw new Response("Server unavailable. Try again in a sec...", {
-      status: 503,
-    });
+  if (!res.ok) return [];
   const data = (await res.json()).data;
   return data;
 }
