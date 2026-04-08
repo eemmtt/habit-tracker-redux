@@ -101,7 +101,7 @@ export default function NewHabit() {
   }, [fetcher.data]);
 
   return (
-    <main className="p-4">
+    <main className="p-4 font-mono">
       <form
         className="flex flex-col gap-4 w-full max-w-sm"
         onSubmit={async (e) => {

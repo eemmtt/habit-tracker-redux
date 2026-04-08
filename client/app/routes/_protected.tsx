@@ -15,7 +15,7 @@ export default function ProtectedLayout() {
   const parent = currMatch.handle?.parent;
   return (
     <>
-      <header className="pl-4 pt-2 pb-2 pr-4 flex flex-row gap-3">
+      <header className="pl-4 pt-2 pb-2 pr-4 flex flex-row gap-3 font-mono text-primary">
         {parent && (
           <Link to={parent} className="text-xl">
             &larr;

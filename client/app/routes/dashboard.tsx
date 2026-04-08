@@ -72,7 +72,7 @@ function HabitList({ summaries }: { summaries: HabitSummary[] }) {
   }
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(350px,1fr))] gap-4 p-4">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(350px,1fr))] gap-4 p-4 pt-2">
       {habitSummaries.map((s: HabitSummary) => (
         <HabitCard key={s.id} data={s} handleUpdate={updateHabits} />
       ))}

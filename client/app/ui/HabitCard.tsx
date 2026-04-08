@@ -43,9 +43,9 @@ function StickerSpot({
   removeSticker: (id: string) => void;
 }) {
   const buttonClassesActive =
-    "border border-primary text-primary rounded-full aspect-square w-full cursor-pointer hover:bg-amber-50";
+    "border border-primary text-primary font-mono rounded-full aspect-square w-full cursor-pointer hover:bg-amber-50";
   const buttonClassesInActive =
-    "border rounded-full aspect-square w-full border-inactive text-inactive";
+    "border rounded-full aspect-square w-full border-inactive text-inactive font-mono";
 
   return (
     <>
@@ -178,6 +178,7 @@ export function HabitCard({
             classNames={{
               root: "grow min-w-0",
               label: "rounded-tl border-r-2 border-card-bg",
+              description: "font-sans",
             }}
             label="HABIT DESCRIPTION"
             description={data.description}

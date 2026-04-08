@@ -22,7 +22,7 @@ export default function SignupForm() {
 
   return (
     <form
-      className="flex flex-col gap-4 w-full max-w-sm"
+      className="flex flex-col gap-4 w-75 max-w-sm"
       onSubmit={async (e) => {
         e.preventDefault();
         setErrorMsg(null);
@@ -32,18 +32,25 @@ export default function SignupForm() {
           return;
         }
 
-        fetcher.submit({
-          intent: "signup",
-          email: email,
-          invite_code: inviteCode,
-        }, { method: "POST", action: "/welcome" });
+        fetcher.submit(
+          {
+            intent: "signup",
+            email: email,
+            invite_code: inviteCode,
+          },
+          { method: "POST", action: "/welcome" },
+        );
       }}
     >
-      <div className="flex flex-col gap-1">
-        <label htmlFor="input-email" className="text-sm font-medium">
+      <div className="flex flex-col font-mono shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] rounded-b">
+        <label
+          htmlFor="input-email"
+          className="text-sm font-mono text-primary bg-header-bg pl-2 pr-2 pt-0.5 pb-0.5 rounded-t"
+        >
           Email:
         </label>
         <input
+          className="text-base text-primary focus:outline-none focus:ring-1 focus:ring-inset font-sans bg-card-bg p-2 pt-1 wrap-break-word grow"
           type="email"
           id="input-email"
           value={email}
@@ -53,12 +60,14 @@ export default function SignupForm() {
           required
           suppressHydrationWarning
         ></input>
-      </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="input-email-confirm" className="text-sm font-medium">
+        <label
+          htmlFor="input-email-confirm"
+          className="text-sm font-mono text-primary bg-header-bg pl-2 pr-2 pt-0.5 pb-0.5"
+        >
           Confirm Email:
         </label>
         <input
+          className="text-base text-primary font-sans focus:outline-none focus:ring-1 focus:ring-inset bg-card-bg p-2 pt-1 wrap-break-word grow"
           type="email"
           id="input-email-confirm"
           value={emailConfirmed}
@@ -68,12 +77,14 @@ export default function SignupForm() {
           required
           suppressHydrationWarning
         ></input>
-      </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="input-invite-code" className="text-sm font-medium">
+        <label
+          htmlFor="input-invite-code"
+          className="text-sm font-mono text-primary bg-header-bg pl-2 pr-2 pt-0.5 pb-0.5"
+        >
           Invite Code:
         </label>
         <input
+          className="text-base text-primary font-sans focus:outline-none focus:ring-1 focus:ring-inset bg-card-bg p-2 pt-1 wrap-break-word grow rounded-b"
           type="text"
           id="input-invite-code"
           value={inviteCode}
@@ -84,10 +95,14 @@ export default function SignupForm() {
           suppressHydrationWarning
         ></input>
       </div>
-      {errorMsg && <p className="error-msg text-red-600 text-sm">{errorMsg}</p>}
-      <button type="submit" className="as-btn">
-        Submit
-      </button>
+      <div className="flex flex-row">
+        {errorMsg && (
+          <p className="pl-2 error-msg text-red-600 text-sm">{errorMsg}</p>
+        )}
+        <button type="submit" className="ml-auto text-sm cursor-pointer">
+          Submit
+        </button>
+      </div>
     </form>
   );
 }

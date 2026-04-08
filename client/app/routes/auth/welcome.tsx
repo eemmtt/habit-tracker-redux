@@ -76,23 +76,29 @@ export async function action({ request }: Route.ActionArgs) {
 export default function Welcome() {
   const [formState, setFormState] = useState<"login" | "register">("login");
   return (
-    <main className="flex flex-col items-center min-h-screen gap-4 pt-8">
-      <h1>STICKY</h1>
-      <div className="w-75 h-75 border"></div>
-      <h2>Habit Tracker</h2>
-      <div className="flex flex-row">
-        <button
-          className={formState === "login" ? "as-btn selected" : "as-btn"}
-          onClick={() => setFormState("login")}
-        >
-          Login
-        </button>
-        <button
-          className={formState === "register" ? "as-btn selected" : "as-btn"}
-          onClick={() => setFormState("register")}
-        >
-          Register
-        </button>
+    <main className="flex flex-col items-center font-mono min-h-screen gap-4 pt-8">
+      <div className="flex flex-col items-center w-75 gap-2 py-8">
+        <h1>Stick to Day</h1>
+        <div className="w-75 h-75 border"></div>
+        <h2>Habit Tracker</h2>
+      </div>
+      <div className="flex flex-col w-75">
+        <div className="flex flex-row gap-2 text-sm font-mono mr-auto">
+          <button
+            className={formState === "login" ? "underline" : "cursor-pointer"}
+            onClick={() => setFormState("login")}
+          >
+            LOGIN
+          </button>
+          <button
+            className={
+              formState === "register" ? "underline" : "cursor-pointer"
+            }
+            onClick={() => setFormState("register")}
+          >
+            REGISTER
+          </button>
+        </div>
       </div>
       {formState === "login" ? <LoginForm /> : <SignupForm />}
     </main>
