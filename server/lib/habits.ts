@@ -40,13 +40,10 @@ export function getTypeStr(interval: string, reps: number) {
 }
 
 export function getAdh(started_at: Date, total_completed: number): string {
-  const daysElapsed = Math.round(
-    (new Date().getUTCMilliseconds() - started_at.getUTCMilliseconds()) /
-      (24 * 60 * 60 * 1000),
-  );
-  if (daysElapsed === 0) {
-    return total_completed > 0 ? "100%" : "0%";
-  }
+  const now = new Date();
+  const startDay = Date.UTC(started_at.getFullYear(), started_at.getMonth(), started_at.getDate());
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const daysElapsed = (today - startDay) / (24 * 60 * 60 * 1000) + 1;
   const rawAdh = (total_completed / daysElapsed) * 100;
   return `${rawAdh.toPrecision(3)}%`;
 }
