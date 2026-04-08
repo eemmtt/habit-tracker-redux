@@ -36,7 +36,7 @@ export default function SignupForm() {
           intent: "signup",
           email: email,
           invite_code: inviteCode,
-        });
+        }, { method: "POST", action: "/welcome" });
       }}
     >
       <div className="flex flex-col gap-1">
