@@ -29,6 +29,38 @@ export function loader({ request }: Route.LoaderArgs) {
   };
 }
 
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+  const cookie = request.headers.get("cookie") ?? "";
+
+  if (intent === "place") {
+    const res = await fetch(`${process.env.API_URL!}api/stickers/place`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({
+        habit_id: formData.get("habit_id"),
+        pack_id: formData.get("pack_id"),
+        placed_at: formData.get("placed_at"),
+        row_idx: Number(formData.get("row_idx")),
+      }),
+    });
+    return await res.json();
+  }
+
+  if (intent === "remove") {
+    const res = await fetch(`${process.env.API_URL!}api/stickers/remove`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({
+        id: formData.get("id"),
+        habit_id: formData.get("habit_id"),
+      }),
+    });
+    return await res.json();
+  }
+}
+
 function HabitList({ summaries }: { summaries: HabitSummary[] }) {
   const [habitSummaries, setHabitSummaries] =
     useState<HabitSummary[]>(summaries);

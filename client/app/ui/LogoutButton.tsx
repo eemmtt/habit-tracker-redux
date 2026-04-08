@@ -1,23 +1,17 @@
-import { useNavigate } from "react-router";
-
-const url = "/api/auth/logout";
+import { useFetcher, useNavigate } from "react-router";
 
 export default function LogoutButton() {
-  const navigate = useNavigate();
+  const fetcher = useFetcher();
 
   return (
     <button
       className="as-btn"
       onClick={async (e) => {
         e.preventDefault();
-        const options = {
-          method: "POST",
-          body: "",
-        };
-        const response = await fetch(url, options);
-        if (response.ok || response.status === 401) {
-          navigate("/welcome");
-        }
+        fetcher.submit(
+          { intent: "logout" },
+          { method: "POST", action: "/welcome" },
+        );
       }}
     >
       Logout

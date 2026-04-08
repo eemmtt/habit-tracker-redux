@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
+import { useFetcher, useNavigate } from "react-router";
 
 const requestCodeUrl = "/api/auth/request-code";
 const verifyCodeUrl = "/api/auth/verify-code";
@@ -10,6 +10,24 @@ export default function LoginForm() {
   const [code, setCode] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const navigate = useNavigate();
+  const fetcher = useFetcher();
+
+  useEffect(() => {
+    if (!fetcher.data) return;
+
+    if (fetcher.data.status === 409) {
+      navigate("/");
+    } else if (fetcher.data.ok) {
+      if (form === "request") {
+        setForm("verify");
+      } else if (form === "verify") {
+        navigate("/");
+      }
+    } else {
+      const data = fetcher.data.res.json();
+      setErrorMsg(data.msg);
+    }
+  }, [fetcher.data]);
 
   return (
     <form
@@ -19,31 +37,22 @@ export default function LoginForm() {
         setErrorMsg(null);
 
         if (form === "request") {
-          const options = {
-            method: "POST",
-            body: JSON.stringify({
+          fetcher.submit(
+            {
+              intent: "request",
               email: email,
-            }),
-          };
-          const response = await fetch(requestCodeUrl, options);
-          if (response.status === 409) {
-            navigate("/");
-          }
-          if (response.ok) {
-            setForm("verify");
-          }
-        } else {
-          const options = {
-            method: "POST",
-            body: JSON.stringify({
+            },
+            { method: "POST", action: "/welcome" },
+          );
+        } else if (form === "verify") {
+          fetcher.submit(
+            {
+              intent: "verify",
               email: email,
               code: code,
-            }),
-          };
-          const response = await fetch(verifyCodeUrl, options);
-          if (response.ok || response.status === 409) {
-            navigate("/");
-          }
+            },
+            { method: "POST", action: "/welcome" },
+          );
         }
       }}
     >

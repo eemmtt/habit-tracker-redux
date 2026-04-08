@@ -1,6 +1,6 @@
 import { redirect } from "react-router";
 
-const url = "http://localhost:3939/api/auth/session";
+const url = `${process.env.API_URL!}api/auth/session`;
 
 export async function requireAuth(request: Request) {
   const result = await fetch(url, {

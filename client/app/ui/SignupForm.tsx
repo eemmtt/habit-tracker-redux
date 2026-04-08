@@ -1,7 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
-
-const url = "/api/auth/signup";
+import { useEffect, useState } from "react";
+import { useFetcher, useNavigate } from "react-router";
 
 export default function SignupForm() {
   const [email, setEmail] = useState("");
@@ -9,6 +7,18 @@ export default function SignupForm() {
   const [inviteCode, setInviteCode] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const navigate = useNavigate();
+  const fetcher = useFetcher();
+
+  useEffect(() => {
+    if (!fetcher.data) return;
+
+    if (fetcher.data.ok) {
+      setEmail("");
+      setEmailConfirmed("");
+      setInviteCode("");
+      navigate("/");
+    }
+  }, [fetcher.data]);
 
   return (
     <form
@@ -22,20 +32,11 @@ export default function SignupForm() {
           return;
         }
 
-        const options = {
-          method: "POST",
-          body: JSON.stringify({
-            email: email,
-            invite_code: inviteCode,
-          }),
-        };
-        const response = await fetch(url, options);
-        if (response.ok) {
-          setEmail("");
-          setEmailConfirmed("");
-          setInviteCode("");
-          navigate("/");
-        }
+        fetcher.submit({
+          intent: "signup",
+          email: email,
+          invite_code: inviteCode,
+        });
       }}
     >
       <div className="flex flex-col gap-1">

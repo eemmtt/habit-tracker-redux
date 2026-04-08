@@ -2,12 +2,75 @@ import LoginForm from "~/ui/LoginForm";
 import type { Route } from "./+types/welcome";
 import SignupForm from "~/ui/SignupForm";
 import { useState } from "react";
+import { redirect } from "react-router";
 
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Welcome" },
     { name: "description", content: "Sticky Habit Tracker Login" },
   ];
+}
+
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+  const cookie = request.headers.get("cookie") ?? "";
+
+  switch (intent) {
+    case "request": {
+      const res = await fetch(`${process.env.API_URL!}api/auth/request-code`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", cookie },
+        body: JSON.stringify({
+          email: formData.get("email"),
+        }),
+      });
+      return { ok: res.ok, status: res.status, res: res };
+    }
+    case "verify": {
+      const res = await fetch(`${process.env.API_URL!}api/auth/verify-code`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", cookie },
+        body: JSON.stringify({
+          email: formData.get("email"),
+          code: formData.get("code"),
+        }),
+      });
+      const setCookie = res.headers.get("set-cookie");
+      return new Response(JSON.stringify({ ok: res.ok, status: res.status }), {
+        headers: {
+          "Content-Type": "application/json",
+          ...(setCookie ? { "Set-Cookie": setCookie } : {}),
+        },
+      });
+    }
+    case "signup": {
+      const res = await fetch(`${process.env.API_URL!}api/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", cookie },
+        body: JSON.stringify({
+          email: formData.get("email"),
+          invite_code: formData.get("invite_code"),
+        }),
+      });
+      return { ok: res.ok, status: res.status, res: res };
+    }
+    case "logout": {
+      const res = await fetch(`${process.env.API_URL!}api/auth/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", cookie },
+        body: "",
+      });
+      const setCookie = res.headers.get("set-cookie");
+      return redirect("/welcome", {
+        headers: {
+          ...(setCookie ? { "Set-Cookie": setCookie } : {}),
+        },
+      });
+    }
+    default:
+      break;
+  }
 }
 
 export default function Welcome() {

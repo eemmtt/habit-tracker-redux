@@ -4,9 +4,9 @@ import type {
   StickerSummary,
 } from "@shared/types";
 import Stat from "./Stat";
-import { act, useState } from "react";
+import { useEffect } from "react";
 import { dateToStr } from "@shared/helpers";
-import { Link, useRevalidator } from "react-router";
+import { Link, useFetcher } from "react-router";
 
 function getWeekAsArray() {
   const today = new Date();
@@ -39,8 +39,8 @@ function StickerSpot({
   sticker: StickerSummary | undefined;
   date: string;
   row_idx: number;
-  placeSticker: (d: string, idx: number) => Promise<void>;
-  removeSticker: (id: string) => Promise<void>;
+  placeSticker: (d: string, idx: number) => void;
+  removeSticker: (id: string) => void;
 }) {
   const buttonClassesActive =
     "border rounded-full aspect-square w-full cursor-pointer hover:bg-amber-50";
@@ -94,8 +94,8 @@ function StickerArea({
   stickers: StickerSummary[];
   row_idx: number;
   num_rows: number;
-  placeSticker: (d: string, idx: number) => Promise<void>;
-  removeSticker: (id: string) => Promise<void>;
+  placeSticker: (d: string, idx: number) => void;
+  removeSticker: (id: string) => void;
 }) {
   const weekDates = getWeekAsArray();
   const today = dateToStr(new Date());
@@ -139,49 +139,36 @@ export function HabitCard({
   handleUpdate: (h: HabitSummary) => void;
 }) {
   const units = data.interval === "weekly" ? "wk" : "d";
+  const fetcher = useFetcher();
 
-  async function placeSticker(date: string, idx: number) {
-    const body = JSON.stringify({
-      habit_id: data.id,
-      pack_id: data.current_sticker_pack_id,
-      placed_at: date,
-      row_idx: idx,
-    });
-
-    const res = await fetch("/api/stickers/place", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: body,
-    });
-    const resBody = await res.json();
-    if (res.ok) {
-      handleUpdate(resBody.data);
-    } else {
-      console.warn(resBody.msg);
+  useEffect(() => {
+    if (fetcher.data?.data) {
+      handleUpdate(fetcher.data.data);
     }
+  }, [fetcher.data]);
+
+  function placeSticker(date: string, idx: number) {
+    fetcher.submit(
+      {
+        intent: "place",
+        habit_id: data.id,
+        pack_id: data.current_sticker_pack_id,
+        placed_at: date,
+        row_idx: idx,
+      },
+      { method: "POST" },
+    );
   }
 
-  async function removeSticker(id: string) {
-    const body = JSON.stringify({
-      id: id,
-      habit_id: data.id,
-    });
-
-    const res = await fetch("/api/stickers/remove", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+  function removeSticker(id: string) {
+    fetcher.submit(
+      {
+        intent: "remove",
+        id,
+        habit_id: data.id,
       },
-      body: body,
-    });
-    const resBody = await res.json();
-    if (res.ok) {
-      handleUpdate(resBody.data);
-    } else {
-      console.log(resBody.msg);
-    }
+      { method: "POST" },
+    );
   }
 
   const stickerAreaClass =
