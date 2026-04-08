@@ -1,6 +1,6 @@
 import LogoutButton from "~/ui/LogoutButton";
 import type { Route } from "./+types/dashboard";
-import { Await, Link, useLoaderData } from "react-router";
+import { Await, Link, redirect, useLoaderData } from "react-router";
 import type { HabitSummary } from "@shared/types";
 import { Suspense, useState } from "react";
 import { HabitCard } from "~/ui/HabitCard";
@@ -19,6 +19,10 @@ async function getHabitSummaries(cookie: string) {
   const res = await fetch(`${process.env.API_URL!}api/habits/summary`, {
     headers: { cookie },
   });
+  if (!res.ok)
+    throw new Response("Server unavailable. Try again in a sec...", {
+      status: 503,
+    });
   const data = (await res.json()).data;
   return data;
 }
