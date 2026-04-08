@@ -83,7 +83,7 @@ function HabitList({ summaries }: { summaries: HabitSummary[] }) {
 export default function Dashboard() {
   const { habitSummaries } = useLoaderData<typeof loader>();
   return (
-    <main className="flex flex-col center">
+    <main className="flex flex-col center pb-32">
       <Suspense fallback={<p>Loading...</p>}>
         <Await resolve={habitSummaries}>
           {(habitSummaries) => <HabitList summaries={habitSummaries} />}

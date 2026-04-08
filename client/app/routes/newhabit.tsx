@@ -1,6 +1,12 @@
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import type { Route } from "./+types/newhabit";
-import { Await, Link, useLoaderData, useNavigate } from "react-router";
+import {
+  Await,
+  Link,
+  useFetcher,
+  useLoaderData,
+  useNavigate,
+} from "react-router";
 import type { CreateHabitFormData, Habit } from "@shared/types";
 import StickerPackSelection from "~/ui/StickerPackSelection";
 import type { RouteHandle } from "~/types";
@@ -12,6 +18,27 @@ export function meta({}: Route.MetaArgs) {
     { title: "New Habit" },
     { name: "description", content: "Start a new habit" },
   ];
+}
+
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+  const cookie = request.headers.get("cookie") ?? "";
+
+  if (intent === "create-habit") {
+    const res = await fetch(`${process.env.API_URL!}api/habits`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({
+        description: formData.get("description"),
+        interval: formData.get("interval"),
+        reps: Number(formData.get("reps")),
+        current_sticker_pack_id: formData.get("current_sticker_pack_id"),
+      }),
+    });
+    const data = await res.json();
+    return { ok: res.ok, status: res.status, res: data };
+  }
 }
 
 async function getStickerPackSummaries(cookie: string) {
@@ -30,7 +57,6 @@ export function loader({ request }: Route.LoaderArgs) {
   };
 }
 
-const url = "api/habits";
 type HabitType = { interval: Habit["interval"]; reps: Habit["reps"] };
 type HabitTypeKey = keyof typeof HabitTypeLookup;
 
@@ -55,11 +81,24 @@ export default function NewHabit() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const { stickerPackSummaries } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
+  const fetcher = useFetcher();
 
   function updateStickerPackId(id: string) {
     setErrorMsg(null);
     setStickerPackId(id);
   }
+
+  useEffect(() => {
+    if (!fetcher.data) return;
+
+    if (fetcher.data.ok) {
+      navigate("/");
+    } else {
+      setErrorMsg(
+        `${fetcher.data.status}: ${fetcher.data.res?.msg ?? "Unknown error"}`,
+      );
+    }
+  }, [fetcher.data]);
 
   return (
     <main className="p-4">
@@ -74,22 +113,16 @@ export default function NewHabit() {
           }
 
           const habitType = HabitTypeLookup[habitTypeKey];
-          const body: CreateHabitFormData = {
-            description: habitDescription,
-            interval: habitType.interval,
-            reps: habitType.reps,
-            current_sticker_pack_id: stickerPackId,
-          };
-          const result = await fetch(url, {
-            method: "POST",
-            body: JSON.stringify(body),
-          });
-          if (result.ok) {
-            navigate("/");
-          } else {
-            const response = await result.json();
-            setErrorMsg(`${result.status}: ${response.msg}`);
-          }
+          fetcher.submit(
+            {
+              intent: "create-habit",
+              description: habitDescription,
+              interval: habitType.interval,
+              reps: habitType.reps,
+              current_sticker_pack_id: stickerPackId,
+            },
+            { method: "POST" },
+          );
         }}
       >
         <div className="flex flex-col gap-1 w-full max-w-sm">
