@@ -7,11 +7,11 @@ import {
 import { configDotenv } from "dotenv";
 
 const milestones = [
-  { num_days: 7, label: "One Week" },
-  { num_days: 14, label: "Two Weeks" },
-  { num_days: 28, label: "Four Weeks" },
-  { num_days: 56, label: "Eight Weeks" },
-  { num_days: 112, label: "Sixteen Weeks" },
+  { num_days: 7, label: "7 d", iconKey: "ms_7" },
+  { num_days: 14, label: "14 d", iconKey: "ms_14" },
+  { num_days: 28, label: "28 d", iconKey: "ms_28" },
+  { num_days: 50, label: "50 d", iconKey: "ms_50" },
+  { num_days: 100, label: "100 d", iconKey: "ms_100" },
 ];
 
 async function main() {

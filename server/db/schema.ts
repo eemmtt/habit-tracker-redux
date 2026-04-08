@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import { text } from "drizzle-orm/pg-core";
 import { check } from "drizzle-orm/pg-core";
 import {
   boolean,
@@ -111,4 +112,5 @@ export const table_milestones = pgTable("milestones", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   num_days: integer().notNull(),
   label: varchar({ length: 255 }).notNull(),
+  iconKey: text("iconKey").notNull().default("ms_default"),
 });

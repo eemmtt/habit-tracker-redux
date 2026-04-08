@@ -60,6 +60,7 @@ app.onError((err, c) => {
 });
 
 export default {
-  port: 3939,
+  port: process.env.PORT ? Number(process.env.PORT) : 3939,
+  hostname: "0.0.0.0",
   fetch: app.fetch,
 };
