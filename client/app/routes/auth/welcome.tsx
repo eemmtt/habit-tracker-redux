@@ -25,7 +25,8 @@ export async function action({ request }: Route.ActionArgs) {
           email: formData.get("email"),
         }),
       });
-      return { ok: res.ok, status: res.status, res: res };
+      const data = await res.json();
+      return { ok: res.ok, status: res.status, res: data };
     }
     case "verify": {
       const res = await fetch(`${process.env.API_URL!}api/auth/verify-code`, {
@@ -53,7 +54,8 @@ export async function action({ request }: Route.ActionArgs) {
           invite_code: formData.get("invite_code"),
         }),
       });
-      return { ok: res.ok, status: res.status, res: res };
+      const data = await res.json();
+      return { ok: res.ok, status: res.status, res: data };
     }
     case "logout": {
       const res = await fetch(`${process.env.API_URL!}api/auth/logout`, {

@@ -24,8 +24,7 @@ export default function LoginForm() {
         navigate("/");
       }
     } else {
-      const data = fetcher.data.res.json();
-      setErrorMsg(data.msg);
+      setErrorMsg(fetcher.data.res.msg);
     }
   }, [fetcher.data]);
 

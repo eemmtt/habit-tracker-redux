@@ -17,6 +17,8 @@ export default function SignupForm() {
       setEmailConfirmed("");
       setInviteCode("");
       navigate("/");
+    } else {
+      setErrorMsg(fetcher.data.res.msg);
     }
   }, [fetcher.data]);
 
