@@ -136,11 +136,14 @@ habits.get("/:id", async (c) => {
 
 habits.post("/:id/delete", async (c) => {
   //delete habit
+  const user_id = c.get("user_id");
   const habit_id = c.req.param("id");
   const result = await db
     .update(table_habits)
     .set({ deleted_at: new Date() })
-    .where(eq(table_habits.id, habit_id))
+    .where(
+      and(eq(table_habits.id, habit_id), eq(table_habits.user_id, user_id)),
+    )
     .returning({ desc: table_habits.description });
   if (result.length === 0) {
     return c.json({ msg: "Failed to delete habit" }, 500);

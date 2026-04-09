@@ -44,6 +44,7 @@ stickers.post("/place", async (c) => {
           and(
             eq(table_stickers_placed.habit_id, habit_id),
             eq(table_stickers_placed.row_idx, row_idx),
+            eq(table_stickers_placed.user_id, user_id),
             sql`${table_stickers_placed.placed_at}::date = ${placed_at}::date`,
             isNotNull(table_stickers_placed.deleted_at),
           ),
@@ -59,6 +60,7 @@ stickers.post("/place", async (c) => {
         .where(
           and(
             eq(table_stickers_placed.habit_id, habit_id),
+            eq(table_stickers_placed.user_id, user_id),
             sql`${table_stickers_placed.placed_at}::date = ${placed_at}::date`,
             isNull(table_stickers_placed.deleted_at),
           ),
@@ -67,7 +69,9 @@ stickers.post("/place", async (c) => {
       const [habit] = await tx
         .select({ reps: table_habits.reps })
         .from(table_habits)
-        .where(eq(table_habits.id, habit_id));
+        .where(
+          and(eq(table_habits.id, habit_id), eq(table_habits.user_id, user_id)),
+        );
 
       if (count === habit.reps) {
         await tx
@@ -119,6 +123,7 @@ stickers.post("/place", async (c) => {
         .where(
           and(
             eq(table_stickers_placed.habit_id, habit_id),
+            eq(table_stickers_placed.user_id, user_id),
             sql`${table_stickers_placed.placed_at}::date = CURRENT_DATE`,
             isNull(table_stickers_placed.deleted_at),
           ),
@@ -127,7 +132,9 @@ stickers.post("/place", async (c) => {
       const [habit] = await tx
         .select({ reps: table_habits.reps })
         .from(table_habits)
-        .where(eq(table_habits.id, habit_id));
+        .where(
+          and(eq(table_habits.id, habit_id), eq(table_habits.user_id, user_id)),
+        );
 
       if (count === habit.reps) {
         await tx
@@ -175,7 +182,12 @@ stickers.post("/remove", async (c) => {
       result = await tx
         .update(table_stickers_placed)
         .set({ deleted_at: new Date() })
-        .where(eq(table_stickers_placed.id, id))
+        .where(
+          and(
+            eq(table_stickers_placed.id, id),
+            eq(table_stickers_placed.user_id, user_id),
+          ),
+        )
         .returning({
           id: table_stickers_placed.id,
           placed_at: table_stickers_placed.placed_at,
@@ -189,6 +201,7 @@ stickers.post("/remove", async (c) => {
         .where(
           and(
             eq(table_stickers_placed.habit_id, habit_id),
+            eq(table_stickers_placed.user_id, user_id),
             sql`${table_stickers_placed.placed_at}::date = ${dateToStr(result[0].placed_at)}::date`,
             isNull(table_stickers_placed.deleted_at),
           ),
@@ -197,7 +210,9 @@ stickers.post("/remove", async (c) => {
       const [habit] = await tx
         .select({ reps: table_habits.reps })
         .from(table_habits)
-        .where(eq(table_habits.id, habit_id));
+        .where(
+          and(eq(table_habits.user_id, user_id), eq(table_habits.id, habit_id)),
+        );
 
       if (count === habit.reps - 1) {
         await tx
