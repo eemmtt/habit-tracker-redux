@@ -178,6 +178,12 @@ auth.get("/session", async (c) => {
   );
   if (!session) return c.json({ msg: "Unauthorized" }, 401);
 
+  const [row] = await db
+    .select({ user_id: table_sessions.user_id })
+    .from(table_sessions)
+    .where(eq(table_sessions.session_token, session));
+  if (!row?.user_id) return c.json({ msg: "Unauthorized" }, 401);
+
   return c.json({ msg: "Authorized" }, 200);
 });
 
