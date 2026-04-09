@@ -6,12 +6,12 @@ import { Suspense, useState } from "react";
 import { HabitCard } from "~/ui/HabitCard";
 import type { RouteHandle } from "~/types";
 
-export const handle: RouteHandle = { title: "Dashboard" };
+export const handle: RouteHandle = { title: "Home" };
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Dashboard" },
-    { name: "description", content: "Sticky Habit Tracker Dashboard" },
+    { title: "Home" },
+    { name: "description", content: "Sticki to Day Home" },
   ];
 }
 
@@ -94,7 +94,7 @@ export default function Dashboard() {
         to="/new-habit"
         className="text-sm cursor-pointer w-fit px-1 focus:outline focus:outline-primary"
       >
-        Start New Habit
+        START NEW HABIT
       </Link>
     </main>
   );

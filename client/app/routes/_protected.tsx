@@ -24,7 +24,7 @@ export default function ProtectedLayout() {
             &larr;
           </Link>
         )}
-        {title === "Dashboard" && (
+        {title === "Home" && (
           <Link
             to="/settings"
             className="text-xl px-1 cursor-pointer focus:outline focus:outline-primary"
