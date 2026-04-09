@@ -73,6 +73,7 @@ stickers.post("/place", async (c) => {
           and(eq(table_habits.id, habit_id), eq(table_habits.user_id, user_id)),
         );
 
+      //if stickers placed equals num reps, increment streak
       if (count === habit.reps) {
         await tx
           .update(table_habits)
