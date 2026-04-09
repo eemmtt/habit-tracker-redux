@@ -1,14 +1,11 @@
-import type {
-  HabitSummary,
-  StickersByPlacedAt,
-  StickerSummary,
-} from "@shared/types";
+import type { HabitSummary, StickerSummary } from "@shared/types";
 import Stat from "./Stat";
 import { useEffect, useRef } from "react";
 import { dateToStr } from "@shared/helpers";
 import { Link, useFetcher, useNavigate } from "react-router";
 
-function getWeekAsArray() {
+function getWeekAsArray(): { date: string; label: string }[] {
+  const labels = ["Mo", "Tu", "Wd", "Th", "Fr", "Sa", "Su"];
   const today = new Date();
   const monday = new Date(
     today.setDate(
@@ -19,7 +16,7 @@ function getWeekAsArray() {
   const currentWeek = Array.from({ length: 7 }, (_, i) => {
     const date = new Date(monday);
     date.setDate(monday.getDate() + i);
-    return dateToStr(date);
+    return { date: dateToStr(date), label: labels[i] };
   });
 
   return currentWeek;
@@ -35,7 +32,7 @@ function StickerSpot({
   removeSticker,
 }: {
   active: boolean;
-  label: number;
+  label: string;
   sticker: StickerSummary | undefined;
   date: string;
   row_idx: number;
@@ -43,9 +40,9 @@ function StickerSpot({
   removeSticker: (id: string) => void;
 }) {
   const buttonClassesActive =
-    "border border-primary text-primary font-mono rounded-full aspect-square w-full cursor-pointer hover:bg-amber-50";
+    "border border-primary text-primary font-mono text-xs rounded-full aspect-square w-full cursor-pointer";
   const buttonClassesInActive =
-    "border rounded-full aspect-square w-full border-inactive text-inactive font-mono";
+    "border rounded-full aspect-square w-full border-inactive text-inactive font-mono text-xs";
 
   return (
     <>
@@ -118,13 +115,13 @@ function StickerArea({
     <div className={classes.root}>
       {weekDates.map((d, idx) => (
         <StickerSpot
-          key={d}
-          label={idx + 1}
-          date={d}
-          active={d === today}
+          key={d.date}
+          label={d.label}
+          date={d.date}
+          active={d.date === today}
           sticker={
             stickers.filter(
-              (v) => v.row_idx === row_idx && v.placed_at === d,
+              (v) => v.row_idx === row_idx && v.placed_at === d.date,
             )[0]
           }
           row_idx={row_idx}
