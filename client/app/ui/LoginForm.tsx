@@ -1,14 +1,21 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useFetcher, useNavigate } from "react-router";
 
 const requestCodeUrl = "/api/auth/request-code";
 const verifyCodeUrl = "/api/auth/verify-code";
 
-export default function LoginForm() {
+export default function LoginForm({
+  loginBtnRef,
+  initialEmail,
+}: {
+  loginBtnRef: React.RefObject<HTMLButtonElement | null>;
+  initialEmail?: string;
+}) {
   const [form, setForm] = useState<"request" | "verify">("request");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail ?? "");
   const [code, setCode] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const codeInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
   const fetcher = useFetcher();
 
@@ -27,6 +34,12 @@ export default function LoginForm() {
       setErrorMsg(fetcher.data.res.msg);
     }
   }, [fetcher.data]);
+
+  useEffect(() => {
+    if (form === "verify") {
+      codeInputRef.current?.focus();
+    }
+  }, [form]);
 
   return (
     <form
@@ -84,7 +97,7 @@ export default function LoginForm() {
             Email:
           </label>
           <input
-            className="text-base text-primary font-sans focus:outline-none focus:ring-1 focus:ring-inset bg-card-bg p-2 pt-1 wrap-break-word grow rounded-b"
+            className="text-base text-primary font-sans focus:outline-none focus:ring-1 focus:ring-inset bg-card-bg p-2 pt-1 wrap-break-word grow"
             type="email"
             id="input-email"
             value={email}
@@ -105,6 +118,7 @@ export default function LoginForm() {
             type="text"
             id="input-verification-code"
             value={code}
+            ref={codeInputRef}
             onChange={(e) => {
               setCode(e.target.value);
             }}
@@ -117,8 +131,12 @@ export default function LoginForm() {
         {errorMsg && (
           <p className="pl-2 error-msg text-red-600 text-sm">{errorMsg}</p>
         )}
-        <button type="submit" className="ml-auto text-sm cursor-pointer">
-          {form === "request" ? "Send Verification Code" : "Login"}
+        <button
+          type="submit"
+          ref={loginBtnRef}
+          className="ml-auto text-sm cursor-pointer px-1 focus:outline focus:outline-primary"
+        >
+          {form === "request" ? "Send Verification Code" : "Continue"}
         </button>
       </div>
     </form>

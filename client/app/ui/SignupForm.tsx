@@ -1,22 +1,25 @@
 import { useEffect, useState } from "react";
 import { useFetcher, useNavigate } from "react-router";
 
-export default function SignupForm() {
+export default function SignupForm({
+  handleCompletion,
+}: {
+  handleCompletion: (email: string) => void;
+}) {
   const [email, setEmail] = useState("");
   const [emailConfirmed, setEmailConfirmed] = useState("");
   const [inviteCode, setInviteCode] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const navigate = useNavigate();
   const fetcher = useFetcher();
 
   useEffect(() => {
     if (!fetcher.data) return;
 
     if (fetcher.data.ok) {
+      handleCompletion(email);
       setEmail("");
       setEmailConfirmed("");
       setInviteCode("");
-      navigate("/");
     } else {
       setErrorMsg(fetcher.data.res.msg);
     }
@@ -101,7 +104,10 @@ export default function SignupForm() {
         {errorMsg && (
           <p className="pl-2 error-msg text-red-600 text-sm">{errorMsg}</p>
         )}
-        <button type="submit" className="ml-auto text-sm cursor-pointer">
+        <button
+          type="submit"
+          className="ml-auto text-sm cursor-pointer px-1 focus:outline focus:outline-primary"
+        >
           Submit
         </button>
       </div>
