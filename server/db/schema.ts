@@ -35,7 +35,7 @@ export const table_verification_codes = pgTable("verificationCodes", {
   user_id: uuid()
     .notNull()
     .references(() => table_users.id),
-  code: uuid().defaultRandom(),
+  code: varchar({ length: 6 }).notNull(),
   expires_at: timestamp("expires_at").default(
     sql`now() + interval '10 minutes'`,
   ),

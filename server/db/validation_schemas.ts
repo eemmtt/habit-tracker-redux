@@ -26,7 +26,10 @@ export const insertVerificationCodeSchema = createInsertSchema(
 
 export const selectVerificationCodeSchema = createSelectSchema(
   table_verification_codes,
-  { email: z.email().max(254).toLowerCase(), code: z.uuid() },
+  {
+    email: z.email().max(254).toLowerCase(),
+    code: z.string().regex(/^\d{6}$/),
+  },
 ).pick({ email: true, code: true });
 
 export const insertUserSchema = createInsertSchema(table_users, {

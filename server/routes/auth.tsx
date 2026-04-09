@@ -42,7 +42,8 @@ auth.post("/request-code", async (c) => {
     return c.json({ msg: `Verification code sent to ${email}` }, 200);
 
   //create verification code in table
-  const code = crypto.randomUUID();
+  // const code = crypto.randomUUID();
+  const code = (crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).toString().padStart(6, "0");
   try {
     await db
       .insert(table_verification_codes)
