@@ -134,6 +134,21 @@ habits.get("/:id", async (c) => {
   //get complete habit data
 });
 
+habits.post("/:id/delete", async (c) => {
+  //delete habit
+  const habit_id = c.req.param("id");
+  const result = await db
+    .update(table_habits)
+    .set({ deleted_at: new Date() })
+    .where(eq(table_habits.id, habit_id))
+    .returning({ desc: table_habits.description });
+  if (result.length === 0) {
+    return c.json({ msg: "Failed to delete habit" }, 500);
+  }
+
+  return c.json({ msg: `Habit "${result[0].desc}" deleted.` }, 200);
+});
+
 habits.get("/:id/summary", async (c) => {
   //get habit data necessary for dashboard view
 });
