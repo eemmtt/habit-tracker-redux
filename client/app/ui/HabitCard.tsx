@@ -1,6 +1,6 @@
 import type { HabitSummary, StickerSummary } from "@shared/types";
 import Stat from "./Stat";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { dateToStr } from "@shared/helpers";
 import { Link, useFetcher, useNavigate } from "react-router";
 
@@ -98,13 +98,14 @@ function StickerArea({
   classes,
   stickers,
   row_idx,
+  disabled,
   placeSticker,
   removeSticker,
 }: {
   classes: { root: string };
   stickers: StickerSummary[];
   row_idx: number;
-  num_rows: number;
+  disabled: boolean;
   placeSticker: (d: string, idx: number) => void;
   removeSticker: (id: string) => void;
 }) {
@@ -113,12 +114,12 @@ function StickerArea({
 
   return (
     <div className={classes.root}>
-      {weekDates.map((d, idx) => (
+      {weekDates.map((d) => (
         <StickerSpot
           key={d.date}
           label={d.label}
           date={d.date}
-          active={d.date === today}
+          active={!disabled && d.date === today}
           sticker={
             stickers.filter(
               (v) => v.row_idx === row_idx && v.placed_at === d.date,
@@ -240,8 +241,8 @@ export function HabitCard({
         <StickerArea
           key={i}
           row_idx={i}
-          num_rows={data.reps}
           stickers={data.stickers}
+          disabled={fetcher.state !== "idle"}
           classes={{
             root:
               data.reps === 1
