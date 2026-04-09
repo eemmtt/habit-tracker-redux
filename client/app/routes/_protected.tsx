@@ -17,12 +17,18 @@ export default function ProtectedLayout() {
     <>
       <header className="pl-4 pt-2 pb-2 pr-4 flex flex-row gap-3 font-mono text-primary">
         {parent && (
-          <Link to={parent} className="text-xl">
+          <Link
+            to={parent}
+            className="text-xl px-1 cursor-pointer focus:outline focus:outline-primary"
+          >
             &larr;
           </Link>
         )}
         {title === "Dashboard" && (
-          <Link to="/settings" className="text-xl">
+          <Link
+            to="/settings"
+            className="text-xl px-1 cursor-pointer focus:outline focus:outline-primary"
+          >
             &#8942;
           </Link>
         )}

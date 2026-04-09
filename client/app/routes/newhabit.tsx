@@ -171,10 +171,16 @@ export default function NewHabit() {
         )}
 
         <div className="flex flex-row gap-2 w-full max-w-sm">
-          <button type="submit" className="as-btn">
+          <button
+            type="submit"
+            className="text-sm cursor-pointer w-fit px-1 focus:outline focus:outline-primary"
+          >
             Create Habit
           </button>
-          <Link to="/" className="as-btn">
+          <Link
+            to="/"
+            className="text-sm cursor-pointer w-fit px-1 focus:outline focus:outline-primary"
+          >
             Cancel
           </Link>
         </div>

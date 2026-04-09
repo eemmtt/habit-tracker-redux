@@ -4,9 +4,9 @@ import type {
   StickerSummary,
 } from "@shared/types";
 import Stat from "./Stat";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { dateToStr } from "@shared/helpers";
-import { Link, useFetcher } from "react-router";
+import { Link, useFetcher, useNavigate } from "react-router";
 
 function getWeekAsArray() {
   const today = new Date();
@@ -53,7 +53,14 @@ function StickerSpot({
         <div
           className="relative"
           id={date}
-          onClick={() => removeSticker(sticker.sticker_placed_id)}
+          onClick={
+            active
+              ? (e) => {
+                  e.stopPropagation();
+                  removeSticker(sticker.sticker_placed_id);
+                }
+              : () => {}
+          }
         >
           <button
             className={active ? buttonClassesActive : buttonClassesInActive}
@@ -70,7 +77,14 @@ function StickerSpot({
         <div
           className="relative"
           id={date}
-          onClick={active ? () => placeSticker(date, row_idx) : () => {}}
+          onClick={
+            active
+              ? (e) => {
+                  e.stopPropagation();
+                  placeSticker(date, row_idx);
+                }
+              : () => {}
+          }
         >
           <button
             className={active ? buttonClassesActive : buttonClassesInActive}
@@ -129,8 +143,10 @@ export function HabitCard({
   data: HabitSummary;
   handleUpdate: (h: HabitSummary) => void;
 }) {
+  const cardRootRef = useRef<HTMLDivElement | null>(null);
   const units = data.interval === "weekly" ? "wk" : "d";
   const fetcher = useFetcher();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (fetcher.data?.data) {
@@ -171,46 +187,58 @@ export function HabitCard({
   ];
 
   return (
-    <div className="w-full max-w-100 h-fit rounded bg-card-bg shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] pb-2">
-      <Link to={`habit/${data.id}`}>
-        <div className="flex flex-row">
-          <Stat
-            classNames={{
-              root: "grow min-w-0",
-              label: "rounded-tl border-r-2 border-card-bg",
-              description: "font-sans",
-            }}
-            label="HABIT DESCRIPTION"
-            description={data.description}
-          />
-          <Stat
-            classNames={{
-              root: "ml-auto",
-              label: "rounded-tr",
-            }}
-            label="ADH"
-            description={data.adh}
-          />
-        </div>
-        <div className="flex flex-row">
-          <Stat
-            classNames={{ root: "grow", label: "border-r-2 border-card-bg" }}
-            label="HABIT TYPE"
-            description={data.type_str}
-          />
-          <Stat
-            classNames={{ root: "grow", label: "border-r-2 border-card-bg" }}
-            label="STREAK"
-            description={data.current_streak.toString()}
-            units={units}
-          />
-          <Stat
-            classNames={{ root: "grow" }}
-            label="NEXT MS"
-            description={data.next_ms}
-          />
-        </div>
-      </Link>
+    <div
+      role="link"
+      tabIndex={0}
+      ref={cardRootRef}
+      onClick={(e) => {
+        if (typeof e.target !== typeof HTMLButtonElement) {
+          navigate(`habit/${data.id}`);
+        } else {
+          e.preventDefault();
+        }
+      }}
+      className="w-full max-w-100 h-fit rounded bg-card-bg shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] pb-2 focus:outline focus:outline-primary"
+    >
+      {/* <Link to={`habit/${data.id}`}> */}
+      <div className="flex flex-row">
+        <Stat
+          classNames={{
+            root: "grow min-w-0",
+            label: "rounded-tl border-r-2 border-card-bg",
+            description: "font-sans",
+          }}
+          label="HABIT DESCRIPTION"
+          description={data.description}
+        />
+        <Stat
+          classNames={{
+            root: "ml-auto",
+            label: "rounded-tr",
+          }}
+          label="ADH"
+          description={data.adh}
+        />
+      </div>
+      <div className="flex flex-row">
+        <Stat
+          classNames={{ root: "grow", label: "border-r-2 border-card-bg" }}
+          label="HABIT TYPE"
+          description={data.type_str}
+        />
+        <Stat
+          classNames={{ root: "grow", label: "border-r-2 border-card-bg" }}
+          label="STREAK"
+          description={data.current_streak.toString()}
+          units={units}
+        />
+        <Stat
+          classNames={{ root: "grow" }}
+          label="NEXT MS"
+          description={data.next_ms}
+        />
+      </div>
+      {/* </Link> */}
       {Array.from({ length: data.reps }, (_, idx) => idx).map((i) => (
         <StickerArea
           key={i}

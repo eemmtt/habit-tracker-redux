@@ -73,7 +73,7 @@ function HabitList({ summaries }: { summaries: HabitSummary[] }) {
   }
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(350px,1fr))] gap-4 p-4 pt-2">
+    <div className="w-full grid grid-cols-[repeat(auto-fill,minmax(350px,1fr))] gap-4 p-4 pt-2">
       {habitSummaries.map((s: HabitSummary) => (
         <HabitCard key={s.id} data={s} handleUpdate={updateHabits} />
       ))}
@@ -84,13 +84,16 @@ function HabitList({ summaries }: { summaries: HabitSummary[] }) {
 export default function Dashboard() {
   const { habitSummaries } = useLoaderData<typeof loader>();
   return (
-    <main className="flex flex-col center pb-32">
+    <main className="flex flex-col items-center pb-32">
       <Suspense fallback={<p>Loading...</p>}>
         <Await resolve={habitSummaries}>
           {(habitSummaries) => <HabitList summaries={habitSummaries} />}
         </Await>
       </Suspense>
-      <Link to="/new-habit" className="as-btn">
+      <Link
+        to="/new-habit"
+        className="text-sm cursor-pointer w-fit px-1 focus:outline focus:outline-primary"
+      >
         Start New Habit
       </Link>
     </main>
