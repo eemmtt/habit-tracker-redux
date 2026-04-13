@@ -116,7 +116,7 @@ habits.get("/summary", async (c) => {
         ...h,
         type_str: getTypeStr(h.interval, h.reps),
         next_ms: getNextMs(h.current_streak, milestones).label,
-        adh: getAdh(h.started_at, h.total_completed),
+        adh: getAdh(h.started_at, h.total_completed, h.reps),
         stickers: habitStickers,
       };
     })

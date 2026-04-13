@@ -39,12 +39,20 @@ export function getTypeStr(interval: string, reps: number) {
   }
 }
 
-export function getAdh(started_at: Date, total_completed: number): string {
+export function getAdh(
+  started_at: Date,
+  total_completed: number,
+  reps_per_day: number,
+): string {
   const now = new Date();
-  const startDay = Date.UTC(started_at.getFullYear(), started_at.getMonth(), started_at.getDate());
+  const startDay = Date.UTC(
+    started_at.getFullYear(),
+    started_at.getMonth(),
+    started_at.getDate(),
+  );
   const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
   const daysElapsed = (today - startDay) / (24 * 60 * 60 * 1000) + 1;
-  const rawAdh = (total_completed / daysElapsed) * 100;
+  const rawAdh = (total_completed / (daysElapsed * reps_per_day)) * 100;
   return `${rawAdh.toPrecision(3)}%`;
 }
 
@@ -111,7 +119,7 @@ export async function getHabitSummary(user_id: string, habit_id: string) {
       ...habit,
       type_str: getTypeStr(habit.interval, habit.reps),
       next_ms: getNextMs(habit.current_streak, milestones).label,
-      adh: getAdh(habit.started_at, habit.total_completed),
+      adh: getAdh(habit.started_at, habit.total_completed, habit.reps),
       stickers: habitStickers,
     },
     status: 200,
