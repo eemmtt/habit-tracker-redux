@@ -83,6 +83,13 @@ function HabitList({ data }: { data: HabitSummaryAndWeek }) {
           handleUpdate={updateHabits}
         />
       ))}
+
+      <Link
+        to="/new-habit"
+        className="text-sm cursor-pointer w-fit px-1 focus:outline focus:outline-primary self-center justify-self-center"
+      >
+        START NEW HABIT
+      </Link>
     </div>
   );
 }
@@ -96,12 +103,6 @@ export default function Home() {
           {(habitData) => <HabitList data={habitData} />}
         </Await>
       </Suspense>
-      <Link
-        to="/new-habit"
-        className="text-sm cursor-pointer w-fit px-1 focus:outline focus:outline-primary"
-      >
-        START NEW HABIT
-      </Link>
     </main>
   );
 }
