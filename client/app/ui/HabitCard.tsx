@@ -1,26 +1,8 @@
-import type { HabitSummary, StickerSummary } from "@shared/types";
+import type { HabitSummary, HabitWeek, StickerSummary } from "@shared/types";
 import Stat from "./Stat";
 import { useEffect, useRef, useState } from "react";
 import { dateToStr } from "@shared/helpers";
-import { Link, useFetcher, useNavigate } from "react-router";
-
-function getWeekAsArray(): { date: string; label: string }[] {
-  const labels = ["Mo", "Tu", "Wd", "Th", "Fr", "Sa", "Su"];
-  const today = new Date();
-  const monday = new Date(
-    today.setDate(
-      today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1),
-    ),
-  );
-
-  const currentWeek = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(monday);
-    date.setDate(monday.getDate() + i);
-    return { date: dateToStr(date), label: labels[i] };
-  });
-
-  return currentWeek;
-}
+import { useFetcher, useNavigate } from "react-router";
 
 function StickerSpot({
   active,
@@ -96,6 +78,7 @@ function StickerSpot({
 
 function StickerArea({
   classes,
+  time,
   stickers,
   row_idx,
   disabled,
@@ -103,23 +86,24 @@ function StickerArea({
   removeSticker,
 }: {
   classes: { root: string };
+  time: HabitWeek;
   stickers: StickerSummary[];
   row_idx: number;
   disabled: boolean;
   placeSticker: (d: string, idx: number) => void;
   removeSticker: (id: string) => void;
 }) {
-  const weekDates = getWeekAsArray();
-  const today = dateToStr(new Date());
+  // const weekDates = getWeekAsArray();
+  // const today = dateToStr(new Date());
 
   return (
     <div className={classes.root}>
-      {weekDates.map((d) => (
+      {time.days.map((d) => (
         <StickerSpot
           key={d.date}
           label={d.label}
           date={d.date}
-          active={!disabled && d.date === today}
+          active={!disabled && d.date === time.today}
           sticker={
             stickers.filter(
               (v) => v.row_idx === row_idx && v.placed_at === d.date,
@@ -135,14 +119,16 @@ function StickerArea({
 }
 
 export function HabitCard({
-  data,
+  summary,
+  time,
   handleUpdate,
 }: {
-  data: HabitSummary;
+  summary: HabitSummary;
+  time: HabitWeek;
   handleUpdate: (h: HabitSummary) => void;
 }) {
   const cardRootRef = useRef<HTMLDivElement | null>(null);
-  const units = data.interval === "weekly" ? "wk" : "d";
+  const units = summary.interval === "weekly" ? "wk" : "d";
   const fetcher = useFetcher();
   const navigate = useNavigate();
 
@@ -156,8 +142,8 @@ export function HabitCard({
     fetcher.submit(
       {
         intent: "place",
-        habit_id: data.id,
-        pack_id: data.current_sticker_pack_id,
+        habit_id: summary.id,
+        pack_id: summary.current_sticker_pack_id,
         placed_at: date,
         row_idx: idx,
       },
@@ -170,7 +156,7 @@ export function HabitCard({
       {
         intent: "remove",
         id,
-        habit_id: data.id,
+        habit_id: summary.id,
       },
       { method: "POST" },
     );
@@ -191,7 +177,7 @@ export function HabitCard({
       ref={cardRootRef}
       onClick={(e) => {
         if (typeof e.target !== typeof HTMLButtonElement) {
-          navigate(`habit/${data.id}`);
+          navigate(`habit/${summary.id}`);
         } else {
           e.preventDefault();
         }
@@ -207,7 +193,7 @@ export function HabitCard({
             description: "font-sans",
           }}
           label="HABIT DESCRIPTION"
-          description={data.description}
+          description={summary.description}
         />
         <Stat
           classNames={{
@@ -215,37 +201,38 @@ export function HabitCard({
             label: "rounded-tr",
           }}
           label="ADH"
-          description={data.adh}
+          description={summary.adh}
         />
       </div>
       <div className="flex flex-row">
         <Stat
           classNames={{ root: "grow", label: "border-r-2 border-card-bg" }}
           label="HABIT TYPE"
-          description={data.type_str}
+          description={summary.type_str}
         />
         <Stat
           classNames={{ root: "grow", label: "border-r-2 border-card-bg" }}
           label="STREAK"
-          description={data.current_streak.toString()}
+          description={summary.current_streak.toString()}
           units={units}
         />
         <Stat
           classNames={{ root: "grow" }}
           label="NEXT MS"
-          description={data.next_ms}
+          description={summary.next_ms}
         />
       </div>
       {/* </Link> */}
-      {Array.from({ length: data.reps }, (_, idx) => idx).map((i) => (
+      {Array.from({ length: summary.reps }, (_, idx) => idx).map((i) => (
         <StickerArea
           key={i}
+          time={time}
           row_idx={i}
-          stickers={data.stickers}
+          stickers={summary.stickers}
           disabled={fetcher.state !== "idle"}
           classes={{
             root:
-              data.reps === 1
+              summary.reps === 1
                 ? stickerAreaClassSingle
                 : stickerAreaClassesMulti[i % 2],
           }}

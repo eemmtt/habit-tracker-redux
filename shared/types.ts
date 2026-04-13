@@ -54,3 +54,18 @@ export type StickerPackSummary = {
     pack_id: string;
   }[];
 };
+
+export type DayLabels = "Mo" | "Tu" | "Wd" | "Th" | "Fr" | "Sa" | "Su";
+
+export type HabitWeek = {
+  today: string; //yyyy-mm-dd
+  days: {
+    date: string; //yyyy-mm-dd
+    label: DayLabels;
+  }[];
+};
+
+export type HabitSummaryAndWeek = {
+  summaries: HabitSummary[];
+  habitWeek: HabitWeek;
+};

@@ -13,6 +13,7 @@ import { and, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 import type { HabitSummary } from "../../shared/types";
 import { dateToStr } from "../../shared/helpers";
 import { getAdh, getNextMs, getTypeStr } from "../lib/habits";
+import { getHabitWeek } from "../lib/time";
 
 const habits = new Hono<{ Variables: CtxVariables }>();
 
@@ -101,7 +102,7 @@ habits.get("/summary", async (c) => {
   const milestones = await db.select().from(table_milestones);
 
   const stickersByHabitMap = Map.groupBy(stickers, (s) => s.habitId);
-  const summary: HabitSummary[] = habits
+  const summaries: HabitSummary[] = habits
     .map((h) => {
       const habitStickers = (stickersByHabitMap.get(h.id) ?? []).map(
         ({ habitId, placed_at, ...s }) => {
@@ -124,7 +125,7 @@ habits.get("/summary", async (c) => {
   return c.json(
     {
       msg: `Found ${habits.length} habits with ${stickers.length} stickers`,
-      data: summary,
+      data: { summaries: summaries, habitWeek: getHabitWeek() },
     },
     200,
   );
