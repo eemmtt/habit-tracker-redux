@@ -7,7 +7,7 @@ import {
 
 export default [
   layout("routes/_protected.tsx", [
-    index("routes/dashboard.tsx"),
+    index("routes/home.tsx"),
     route("new-habit", "routes/newhabit.tsx"),
     route("settings", "routes/settings.tsx"),
     route("habit/:id", "routes/habit.tsx"),

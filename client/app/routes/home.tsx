@@ -1,7 +1,7 @@
 import LogoutButton from "~/ui/LogoutButton";
-import type { Route } from "./+types/dashboard";
+import type { Route } from "./+types/home";
 import { Await, Link, redirect, useLoaderData } from "react-router";
-import type { HabitSummary } from "@shared/types";
+import type { HabitSummary, HabitSummaryAndWeek } from "@shared/types";
 import { Suspense, useState } from "react";
 import { HabitCard } from "~/ui/HabitCard";
 import type { RouteHandle } from "~/types";
@@ -15,18 +15,18 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-async function getHabitSummaries(cookie: string) {
+async function getHabitData(cookie: string): Promise<HabitSummaryAndWeek> {
   const res = await fetch(`${process.env.API_URL!}api/habits/summary`, {
     headers: { cookie },
   });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`${res.status}: Failed to fetch Habits`);
   const data = (await res.json()).data;
   return data;
 }
 
 export function loader({ request }: Route.LoaderArgs) {
   return {
-    habitSummaries: getHabitSummaries(request.headers.get("cookie") ?? ""),
+    habitData: getHabitData(request.headers.get("cookie") ?? ""),
   };
 }
 
@@ -62,9 +62,10 @@ export async function action({ request }: Route.ActionArgs) {
   }
 }
 
-function HabitList({ summaries }: { summaries: HabitSummary[] }) {
-  const [habitSummaries, setHabitSummaries] =
-    useState<HabitSummary[]>(summaries);
+function HabitList({ data }: { data: HabitSummaryAndWeek }) {
+  const [habitSummaries, setHabitSummaries] = useState<HabitSummary[]>(
+    data.summaries,
+  );
 
   function updateHabits(updatedSummary: HabitSummary) {
     setHabitSummaries((prev) =>
@@ -75,19 +76,24 @@ function HabitList({ summaries }: { summaries: HabitSummary[] }) {
   return (
     <div className="w-full grid grid-cols-[repeat(auto-fill,minmax(350px,1fr))] gap-4 p-4 pt-2">
       {habitSummaries.map((s: HabitSummary) => (
-        <HabitCard key={s.id} data={s} handleUpdate={updateHabits} />
+        <HabitCard
+          key={s.id}
+          summary={s}
+          time={data.habitWeek}
+          handleUpdate={updateHabits}
+        />
       ))}
     </div>
   );
 }
 
-export default function Dashboard() {
-  const { habitSummaries } = useLoaderData<typeof loader>();
+export default function Home() {
+  const { habitData } = useLoaderData<typeof loader>();
   return (
     <main className="flex flex-col items-center pb-32">
       <Suspense fallback={<p>Loading...</p>}>
-        <Await resolve={habitSummaries}>
-          {(habitSummaries) => <HabitList summaries={habitSummaries} />}
+        <Await resolve={habitData}>
+          {(habitData) => <HabitList data={habitData} />}
         </Await>
       </Suspense>
       <Link
