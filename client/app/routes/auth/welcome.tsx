@@ -28,7 +28,7 @@ export async function action({ request }: Route.ActionArgs) {
       if (!res.ok)
         return { ok: false, status: res.status, msg: "Server unavailable" };
       const data = await res.json();
-      return { ok: true, status: res.status, res: data };
+      return { ok: true, status: res.status, msg: "Got habits" };
     }
     case "verify": {
       const res = await fetch(`${process.env.API_URL!}auth/verify-code`, {
@@ -61,7 +61,7 @@ export async function action({ request }: Route.ActionArgs) {
       if (!res.ok)
         return { ok: false, status: res.status, msg: "Server unavailable" };
       const data = await res.json();
-      return { ok: true, status: res.status, res: data };
+      return { ok: true, status: res.status, msg: "Signup complete" };
     }
     case "logout": {
       const res = await fetch(`${process.env.API_URL!}auth/logout`, {

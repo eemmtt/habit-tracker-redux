@@ -1,9 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useFetcher, useNavigate } from "react-router";
 
-const requestCodeUrl = "/api/auth/request-code";
-const verifyCodeUrl = "/api/auth/verify-code";
-
 export default function LoginForm({
   loginBtnRef,
   initialEmail,
@@ -31,7 +28,7 @@ export default function LoginForm({
         navigate("/");
       }
     } else {
-      setErrorMsg(fetcher.data.res.msg);
+      setErrorMsg(fetcher.data.msg);
     }
   }, [fetcher.data]);
 

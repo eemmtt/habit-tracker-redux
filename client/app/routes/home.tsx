@@ -15,11 +15,13 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-async function getHabitData(cookie: string): Promise<HabitSummaryAndWeek> {
+async function getHabitData(
+  cookie: string,
+): Promise<HabitSummaryAndWeek | null> {
   const res = await fetch(`${process.env.API_URL!}habits/summary`, {
     headers: { cookie },
   });
-  if (!res.ok) throw new Error(`${res.status}: Failed to fetch Habits`);
+  if (!res.ok) return null;
   const data = (await res.json()).data;
   return data;
 }
@@ -100,7 +102,7 @@ export default function Home() {
     <main className="flex flex-col items-center pb-32">
       <Suspense fallback={<p>Loading...</p>}>
         <Await resolve={habitData}>
-          {(habitData) => <HabitList data={habitData} />}
+          {(habitData) => habitData && <HabitList data={habitData} />}
         </Await>
       </Suspense>
     </main>

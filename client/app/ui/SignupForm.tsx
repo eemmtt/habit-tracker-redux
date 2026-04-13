@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useFetcher, useNavigate } from "react-router";
+import { useFetcher } from "react-router";
 
 export default function SignupForm({
   handleCompletion,
@@ -21,7 +21,7 @@ export default function SignupForm({
       setEmailConfirmed("");
       setInviteCode("");
     } else {
-      setErrorMsg(fetcher.data.res.msg);
+      setErrorMsg(fetcher.data.msg);
     }
   }, [fetcher.data]);
 
