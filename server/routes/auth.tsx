@@ -43,7 +43,9 @@ auth.post("/request-code", async (c) => {
 
   //create verification code in table
   // const code = crypto.randomUUID();
-  const code = (crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).toString().padStart(6, "0");
+  const code = (crypto.getRandomValues(new Uint32Array(1))[0] % 1000000)
+    .toString()
+    .padStart(6, "0");
   try {
     await db
       .insert(table_verification_codes)
@@ -116,7 +118,7 @@ auth.post("/verify-code", async (c) => {
     process.env.SESSION_COOKIE!,
     token,
     process.env.COOKIE_SECRET!,
-    { path: "/", /*secure: true,*/ httpOnly: true },
+    { path: "/", secure: true, httpOnly: true },
   );
 
   //set user to verified if not verified
@@ -144,7 +146,8 @@ auth.post("/logout", async (c) => {
   //delete cookie
   deleteCookie(c, process.env.SESSION_COOKIE!, {
     path: "/",
-    /*secure: true,*/ httpOnly: true,
+    secure: true,
+    httpOnly: true,
   });
 
   return c.json({ msg: "Fare well" }, 200);
