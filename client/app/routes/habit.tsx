@@ -19,7 +19,7 @@ export async function action({ request }: Route.ActionArgs) {
   if (intent === "delete-habit") {
     const habit_id = formData.get("habit_id") ?? "";
     const rest = await fetch(
-      `${process.env.API_URL}api/habits/${habit_id}/delete`,
+      `${process.env.API_URL}habits/${habit_id}/delete`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json", cookie },

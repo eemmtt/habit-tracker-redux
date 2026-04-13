@@ -16,7 +16,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 async function getHabitData(cookie: string): Promise<HabitSummaryAndWeek> {
-  const res = await fetch(`${process.env.API_URL!}api/habits/summary`, {
+  const res = await fetch(`${process.env.API_URL!}habits/summary`, {
     headers: { cookie },
   });
   if (!res.ok) throw new Error(`${res.status}: Failed to fetch Habits`);
@@ -36,7 +36,7 @@ export async function action({ request }: Route.ActionArgs) {
   const cookie = request.headers.get("cookie") ?? "";
 
   if (intent === "place") {
-    const res = await fetch(`${process.env.API_URL!}api/stickers/place`, {
+    const res = await fetch(`${process.env.API_URL!}stickers/place`, {
       method: "POST",
       headers: { "Content-Type": "application/json", cookie },
       body: JSON.stringify({
@@ -50,7 +50,7 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   if (intent === "remove") {
-    const res = await fetch(`${process.env.API_URL!}api/stickers/remove`, {
+    const res = await fetch(`${process.env.API_URL!}stickers/remove`, {
       method: "POST",
       headers: { "Content-Type": "application/json", cookie },
       body: JSON.stringify({

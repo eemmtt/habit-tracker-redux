@@ -26,7 +26,7 @@ export async function action({ request }: Route.ActionArgs) {
   const cookie = request.headers.get("cookie") ?? "";
 
   if (intent === "create-habit") {
-    const res = await fetch(`${process.env.API_URL!}api/habits`, {
+    const res = await fetch(`${process.env.API_URL!}habits`, {
       method: "POST",
       headers: { "Content-Type": "application/json", cookie },
       body: JSON.stringify({
@@ -42,7 +42,7 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 async function getStickerPackSummaries(cookie: string) {
-  const res = await fetch(`${process.env.API_URL!}api/sticker-packs/summary`, {
+  const res = await fetch(`${process.env.API_URL!}sticker-packs/summary`, {
     headers: { cookie },
   });
   if (!res.ok) return [];

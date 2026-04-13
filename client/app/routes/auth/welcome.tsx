@@ -18,7 +18,7 @@ export async function action({ request }: Route.ActionArgs) {
 
   switch (intent) {
     case "request": {
-      const res = await fetch(`${process.env.API_URL!}api/auth/request-code`, {
+      const res = await fetch(`${process.env.API_URL!}auth/request-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json", cookie },
         body: JSON.stringify({
@@ -31,7 +31,7 @@ export async function action({ request }: Route.ActionArgs) {
       return { ok: true, status: res.status, res: data };
     }
     case "verify": {
-      const res = await fetch(`${process.env.API_URL!}api/auth/verify-code`, {
+      const res = await fetch(`${process.env.API_URL!}auth/verify-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json", cookie },
         body: JSON.stringify({
@@ -50,7 +50,7 @@ export async function action({ request }: Route.ActionArgs) {
       });
     }
     case "signup": {
-      const res = await fetch(`${process.env.API_URL!}api/auth/signup`, {
+      const res = await fetch(`${process.env.API_URL!}auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json", cookie },
         body: JSON.stringify({
@@ -64,7 +64,7 @@ export async function action({ request }: Route.ActionArgs) {
       return { ok: true, status: res.status, res: data };
     }
     case "logout": {
-      const res = await fetch(`${process.env.API_URL!}api/auth/logout`, {
+      const res = await fetch(`${process.env.API_URL!}auth/logout`, {
         method: "POST",
         headers: { "Content-Type": "application/json", cookie },
         body: "",

@@ -19,7 +19,7 @@ app.use(async (c, next) => {
 
 //auth
 app.use(async (c, next) => {
-  if (c.req.path.startsWith("/api/auth")) {
+  if (c.req.path.startsWith(`${process.env.API_URL}auth`)) {
     return next();
   }
 
@@ -45,18 +45,18 @@ app.get("/", (c) => {
   return c.text("Hello Stickler!");
 });
 
-app.route("/api/auth", auth);
-app.route("/api/habits", habits);
-app.route("/api/stickers", stickers);
-app.route("/api/sticker-packs", sticker_packs);
+app.route(`${process.env.API_URL}auth`, auth);
+app.route(`${process.env.API_URL}habits`, habits);
+app.route(`${process.env.API_URL}stickers`, stickers);
+app.route(`${process.env.API_URL}sticker-packs`, sticker_packs);
 
 app.notFound((c) => {
-  return c.json({ ok: false, msg: "Woosp, it's a 404" }, 404);
+  return c.json({ msg: "Woosp, it's a 404" }, 404);
 });
 
 app.onError((err, c) => {
   console.error(err);
-  return c.json({ ok: false, msg: err.message }, 500);
+  return c.json({ msg: err.message }, 500);
 });
 
 export default {
