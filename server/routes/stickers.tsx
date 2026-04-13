@@ -74,15 +74,14 @@ stickers.post("/place", async (c) => {
         );
 
       //if stickers placed equals num reps, increment streak
-      if (count === habit.reps) {
-        await tx
-          .update(table_habits)
-          .set({
-            current_streak: sql`${table_habits.current_streak} + 1`,
-            total_completed: sql`${table_habits.total_completed} + 1`,
-          })
-          .where(eq(table_habits.id, habit_id));
-      }
+      const streakIncrement = count === habit.reps ? 1 : 0;
+      await tx
+        .update(table_habits)
+        .set({
+          current_streak: sql`${table_habits.current_streak} + ${streakIncrement}`,
+          total_completed: sql`${table_habits.total_completed} + 1`,
+        })
+        .where(eq(table_habits.id, habit_id));
     });
   } catch (error) {}
 
@@ -137,15 +136,14 @@ stickers.post("/place", async (c) => {
           and(eq(table_habits.id, habit_id), eq(table_habits.user_id, user_id)),
         );
 
-      if (count === habit.reps) {
-        await tx
-          .update(table_habits)
-          .set({
-            current_streak: sql`${table_habits.current_streak} + 1`,
-            total_completed: sql`${table_habits.total_completed} + 1`,
-          })
-          .where(eq(table_habits.id, habit_id));
-      }
+      const streakIncrement = count === habit.reps ? 1 : 0;
+      await tx
+        .update(table_habits)
+        .set({
+          current_streak: sql`${table_habits.current_streak} + ${streakIncrement}`,
+          total_completed: sql`${table_habits.total_completed} + 1`,
+        })
+        .where(eq(table_habits.id, habit_id));
     });
   } catch (error) {
     return c.json(
@@ -215,15 +213,14 @@ stickers.post("/remove", async (c) => {
           and(eq(table_habits.user_id, user_id), eq(table_habits.id, habit_id)),
         );
 
-      if (count === habit.reps - 1) {
-        await tx
-          .update(table_habits)
-          .set({
-            current_streak: sql`${table_habits.current_streak} - 1`,
-            total_completed: sql`${table_habits.total_completed} - 1`,
-          })
-          .where(eq(table_habits.id, habit_id));
-      }
+      const streakDecrement = count === habit.reps - 1 ? -1 : 0;
+      await tx
+        .update(table_habits)
+        .set({
+          current_streak: sql`${table_habits.current_streak} + ${streakDecrement}`,
+          total_completed: sql`${table_habits.total_completed} - 1`,
+        })
+        .where(eq(table_habits.id, habit_id));
     });
   } catch (error) {
     console.log(error);
