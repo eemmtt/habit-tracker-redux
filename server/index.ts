@@ -15,6 +15,7 @@ const app = new Hono<{ Variables: CtxVariables }>();
 app.use(async (c, next) => {
   console.log(`[${c.req.method}] ${c.req.url}`);
   await next();
+  // console.log(`Replied [${c.req.method}] ${c.req.url} ${c.res.status}`);
 });
 
 //auth

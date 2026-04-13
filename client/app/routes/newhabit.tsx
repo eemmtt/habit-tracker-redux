@@ -2,6 +2,7 @@ import { Suspense, useEffect, useState } from "react";
 import type { Route } from "./+types/newhabit";
 import {
   Await,
+  data,
   Link,
   useFetcher,
   useLoaderData,
@@ -9,7 +10,7 @@ import {
 } from "react-router";
 import type { CreateHabitFormData, Habit } from "@shared/types";
 import StickerPackSelection from "~/ui/StickerPackSelection";
-import type { RouteHandle } from "~/types";
+import type { FetchReturn, RouteHandle } from "~/types";
 
 export const handle: RouteHandle = { title: "New Habit", parent: "/" };
 
@@ -36,8 +37,19 @@ export async function action({ request }: Route.ActionArgs) {
         current_sticker_pack_id: formData.get("current_sticker_pack_id"),
       }),
     });
-    const data = await res.json();
-    return { ok: res.ok, status: res.status, res: data };
+    let out: FetchReturn;
+    if (!res.ok) {
+      out = {
+        ok: false,
+        status: res.status,
+        msg: "Failed to create habit",
+      };
+      return data(out);
+    }
+
+    const obj = await res.json();
+    out = { ok: res.ok, status: res.status, msg: "Habit created", data: obj };
+    return data(out);
   }
 }
 
@@ -45,7 +57,7 @@ async function getStickerPackSummaries(cookie: string) {
   const res = await fetch(`${process.env.API_URL!}sticker-packs/summary`, {
     headers: { cookie },
   });
-  if (!res.ok) return [];
+  if (!res.ok) return null;
   const data = (await res.json()).data;
   return data;
 }
@@ -95,9 +107,7 @@ export default function NewHabit() {
     if (fetcher.data.ok) {
       navigate("/");
     } else {
-      setErrorMsg(
-        `${fetcher.data.status}: ${fetcher.data.res?.msg ?? "Unknown error"}`,
-      );
+      setErrorMsg(`${fetcher.data.status}: ${fetcher.data.msg}`);
     }
   }, [fetcher.data]);
 
@@ -159,7 +169,7 @@ export default function NewHabit() {
           <Await resolve={stickerPackSummaries}>
             {(stickerPackSummaries) => (
               <StickerPackSelection
-                summaries={stickerPackSummaries}
+                summaries={stickerPackSummaries ?? []}
                 handleClick={updateStickerPackId}
               />
             )}

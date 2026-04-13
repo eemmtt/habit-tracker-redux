@@ -2,7 +2,8 @@ import LoginForm from "~/ui/LoginForm";
 import type { Route } from "./+types/welcome";
 import SignupForm from "~/ui/SignupForm";
 import { useEffect, useRef, useState } from "react";
-import { redirect } from "react-router";
+import { redirect, data } from "react-router";
+import type { FetchReturn } from "~/types";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -25,10 +26,24 @@ export async function action({ request }: Route.ActionArgs) {
           email: formData.get("email"),
         }),
       });
-      if (!res.ok)
-        return { ok: false, status: res.status, msg: "Server unavailable" };
-      const data = await res.json();
-      return { ok: true, status: res.status, msg: "Got habits" };
+      let out: FetchReturn;
+      if (!res.ok) {
+        out = {
+          ok: false,
+          status: res.status,
+          msg: "Server unavailable",
+        };
+        return data(out);
+      }
+
+      const obj = await res.json();
+      out = {
+        ok: true,
+        status: res.status,
+        msg: "Got habits",
+        data: obj,
+      };
+      return data(out);
     }
     case "verify": {
       const res = await fetch(`${process.env.API_URL!}auth/verify-code`, {
@@ -39,10 +54,24 @@ export async function action({ request }: Route.ActionArgs) {
           code: formData.get("code"),
         }),
       });
-      if (!res.ok)
-        return { ok: false, status: res.status, msg: "Server unavailable" };
+
+      let out: FetchReturn;
+      if (!res.ok) {
+        out = {
+          ok: false,
+          status: res.status,
+          msg: "Server unavailable",
+        };
+        return data(out);
+      }
+
       const setCookie = res.headers.get("set-cookie");
-      return new Response(JSON.stringify({ ok: true, status: res.status }), {
+      out = {
+        ok: true,
+        status: res.status,
+        msg: "Session created",
+      };
+      return data(out, {
         headers: {
           "Content-Type": "application/json",
           ...(setCookie ? { "Set-Cookie": setCookie } : {}),
@@ -58,10 +87,15 @@ export async function action({ request }: Route.ActionArgs) {
           invite_code: formData.get("invite_code"),
         }),
       });
-      if (!res.ok)
-        return { ok: false, status: res.status, msg: "Server unavailable" };
-      const data = await res.json();
-      return { ok: true, status: res.status, msg: "Signup complete" };
+      let out: FetchReturn;
+      if (!res.ok) {
+        out = { ok: false, status: res.status, msg: "Server unavailable" };
+        return data(out);
+      }
+
+      const obj = await res.json();
+      out = { ok: true, status: res.status, msg: "Signup complete", data: obj };
+      return data(out);
     }
     case "logout": {
       const res = await fetch(`${process.env.API_URL!}auth/logout`, {
