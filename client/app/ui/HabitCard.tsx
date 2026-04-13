@@ -1,8 +1,12 @@
 import type { HabitSummary, HabitWeek, StickerSummary } from "@shared/types";
 import Stat from "./Stat";
 import { useEffect, useRef, useState } from "react";
-import { dateToStr } from "@shared/helpers";
 import { useFetcher, useNavigate } from "react-router";
+
+const STICKER_SPOT_ACTIVE =
+  "border border-primary text-primary font-mono text-xs rounded-full aspect-square w-full cursor-pointer";
+const STICKER_SPOT_DISABLED =
+  "border rounded-full aspect-square w-full border-inactive text-inactive font-mono text-xs";
 
 function StickerSpot({
   active,
@@ -21,28 +25,19 @@ function StickerSpot({
   placeSticker: (d: string, idx: number) => void;
   removeSticker: (id: string) => void;
 }) {
-  const buttonClassesActive =
-    "border border-primary text-primary font-mono text-xs rounded-full aspect-square w-full cursor-pointer";
-  const buttonClassesInActive =
-    "border rounded-full aspect-square w-full border-inactive text-inactive font-mono text-xs";
-
   return (
     <>
       {sticker ? (
         <div
           className="relative"
           id={date}
-          onClick={
-            active
-              ? (e) => {
-                  e.stopPropagation();
-                  removeSticker(sticker.sticker_placed_id);
-                }
-              : () => {}
-          }
+          onClick={(e) => {
+            e.stopPropagation();
+            removeSticker(sticker.sticker_placed_id);
+          }}
         >
           <button
-            className={active ? buttonClassesActive : buttonClassesInActive}
+            className={active ? STICKER_SPOT_ACTIVE : STICKER_SPOT_DISABLED}
           >
             {label}
           </button>
@@ -56,17 +51,13 @@ function StickerSpot({
         <div
           className="relative"
           id={date}
-          onClick={
-            active
-              ? (e) => {
-                  e.stopPropagation();
-                  placeSticker(date, row_idx);
-                }
-              : () => {}
-          }
+          onClick={(e) => {
+            e.stopPropagation();
+            placeSticker(date, row_idx);
+          }}
         >
           <button
-            className={active ? buttonClassesActive : buttonClassesInActive}
+            className={active ? STICKER_SPOT_ACTIVE : STICKER_SPOT_DISABLED}
           >
             {label}
           </button>
