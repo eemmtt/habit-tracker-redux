@@ -1,5 +1,5 @@
 import { and, eq, gte, inArray, isNull, sql } from "drizzle-orm";
-import { dateToStr } from "../../shared/helpers";
+import { dateToStr, getAdh } from "../lib/time";
 import { HabitSummary } from "../../shared/types";
 import {
   table_habits,
@@ -37,23 +37,6 @@ export function getTypeStr(interval: string, reps: number) {
     default:
       return `${reps} ${interval}`;
   }
-}
-
-export function getAdh(
-  started_at: Date,
-  total_completed: number,
-  reps_per_day: number,
-): string {
-  const now = new Date();
-  const startDay = Date.UTC(
-    started_at.getFullYear(),
-    started_at.getMonth(),
-    started_at.getDate(),
-  );
-  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-  const daysElapsed = (today - startDay) / (24 * 60 * 60 * 1000) + 1;
-  const rawAdh = (total_completed / (daysElapsed * reps_per_day)) * 100;
-  return `${rawAdh.toPrecision(3)}%`;
 }
 
 export async function getHabitSummary(user_id: string, habit_id: string) {

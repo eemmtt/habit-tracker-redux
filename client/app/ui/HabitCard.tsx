@@ -2,14 +2,15 @@ import type { HabitSummary, HabitWeek, StickerSummary } from "@shared/types";
 import Stat from "./Stat";
 import { useEffect, useRef, useState } from "react";
 import { useFetcher, useNavigate } from "react-router";
+import TodayCircle from "./svgs/TodayCircle";
+import DayCircle from "./svgs/DayCircle";
 
-const STICKER_SPOT_ACTIVE =
-  "border border-primary text-primary font-mono text-xs rounded-full aspect-square w-full cursor-pointer";
-const STICKER_SPOT_DISABLED =
-  "border rounded-full aspect-square w-full border-inactive text-inactive font-mono text-xs";
+const STICKER_SPOT_CONTAINER =
+  "relative aspect-square flex items-center justify-center";
 
 function StickerSpot({
   active,
+  isToday,
   label,
   sticker,
   date,
@@ -18,6 +19,7 @@ function StickerSpot({
   removeSticker,
 }: {
   active: boolean;
+  isToday: boolean;
   label: string;
   sticker: StickerSummary | undefined;
   date: string;
@@ -29,18 +31,23 @@ function StickerSpot({
     <>
       {sticker ? (
         <div
-          className="relative"
+          className={
+            active
+              ? STICKER_SPOT_CONTAINER + " text-primary"
+              : STICKER_SPOT_CONTAINER + " text-inactive"
+          }
           id={date}
           onClick={(e) => {
             e.stopPropagation();
             removeSticker(sticker.sticker_placed_id);
           }}
         >
-          <button
-            className={active ? STICKER_SPOT_ACTIVE : STICKER_SPOT_DISABLED}
-          >
-            {label}
-          </button>
+          {isToday ? (
+            <TodayCircle className="w-full h-full absolute" />
+          ) : (
+            <DayCircle className="w-15/16 h-15/16 absolute" />
+          )}
+          <p className="font-mono text-xs">{label}</p>
           <img
             src={sticker.imageUrl ? sticker.imageUrl + "_256px.webp" : ""}
             alt={sticker.sticker_name}
@@ -49,18 +56,23 @@ function StickerSpot({
         </div>
       ) : (
         <div
-          className="relative"
+          className={
+            active
+              ? STICKER_SPOT_CONTAINER + " text-primary"
+              : STICKER_SPOT_CONTAINER + " text-inactive"
+          }
           id={date}
           onClick={(e) => {
             e.stopPropagation();
             placeSticker(date, row_idx);
           }}
         >
-          <button
-            className={active ? STICKER_SPOT_ACTIVE : STICKER_SPOT_DISABLED}
-          >
-            {label}
-          </button>
+          {isToday ? (
+            <TodayCircle className="w-full h-full absolute" />
+          ) : (
+            <DayCircle className="w-15/16 h-15/16 absolute" />
+          )}
+          <p className="font-mono text-xs">{label}</p>
         </div>
       )}
     </>
@@ -84,17 +96,17 @@ function StickerArea({
   placeSticker: (d: string, idx: number) => void;
   removeSticker: (id: string) => void;
 }) {
-  // const weekDates = getWeekAsArray();
-  // const today = dateToStr(new Date());
+  const todayIdx = time.days.map((t) => t.date).indexOf(time.today);
 
   return (
     <div className={classes.root}>
-      {time.days.map((d) => (
+      {time.days.map((d, idx) => (
         <StickerSpot
           key={d.date}
           label={d.label}
           date={d.date}
-          active={!disabled && d.date === time.today}
+          isToday={idx === todayIdx}
+          active={!disabled && idx <= todayIdx}
           sticker={
             stickers.filter(
               (v) => v.row_idx === row_idx && v.placed_at === d.date,
@@ -175,7 +187,6 @@ export function HabitCard({
       }}
       className="w-full max-w-100 h-fit rounded bg-card-bg shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] pb-2 focus:outline focus:outline-primary"
     >
-      {/* <Link to={`habit/${data.id}`}> */}
       <div className="flex flex-row">
         <Stat
           classNames={{
@@ -213,7 +224,6 @@ export function HabitCard({
           description={summary.next_ms}
         />
       </div>
-      {/* </Link> */}
       {Array.from({ length: summary.reps }, (_, idx) => idx).map((i) => (
         <StickerArea
           key={i}
