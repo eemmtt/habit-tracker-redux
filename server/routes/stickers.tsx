@@ -119,6 +119,18 @@ stickers.post("/place", async (c) => {
   //insert placed_sticker, increment streak
   try {
     await db.transaction(async (tx) => {
+      const [habit] = await tx
+        .select({
+          reps: table_habits.reps,
+          start_date: table_habits.start_date,
+        })
+        .from(table_habits)
+        .where(
+          and(eq(table_habits.id, habit_id), eq(table_habits.user_id, user_id)),
+        );
+      if (habit.start_date.localeCompare(placed_date) > 0)
+        throw Error("Sticker may not be placed before habit started");
+
       await tx.insert(table_stickers_placed).values({
         user_id: user_id,
         habit_id: habit_id,
@@ -138,13 +150,6 @@ stickers.post("/place", async (c) => {
             eq(table_stickers_placed.placed_date, clientToday),
             isNull(table_stickers_placed.deleted_at),
           ),
-        );
-
-      const [habit] = await tx
-        .select({ reps: table_habits.reps })
-        .from(table_habits)
-        .where(
-          and(eq(table_habits.id, habit_id), eq(table_habits.user_id, user_id)),
         );
 
       const streakIncrement = count === habit.reps ? 1 : 0;

@@ -6,7 +6,7 @@ import TodayCircle from "./svgs/TodayCircle";
 import DayCircle from "./svgs/DayCircle";
 
 const STICKER_SPOT_CONTAINER =
-  "relative aspect-square flex items-center justify-center";
+  "relative aspect-square flex items-center justify-center hover:outline";
 
 function StickerSpot({
   active,
@@ -37,10 +37,14 @@ function StickerSpot({
               : STICKER_SPOT_CONTAINER + " text-inactive"
           }
           id={date}
-          onClick={(e) => {
-            e.stopPropagation();
-            removeSticker(sticker.sticker_placed_id);
-          }}
+          onClick={
+            active
+              ? (e) => {
+                  e.stopPropagation();
+                  removeSticker(sticker.sticker_placed_id);
+                }
+              : () => {}
+          }
         >
           {isToday ? (
             <TodayCircle className="w-full h-full absolute" />
@@ -62,10 +66,14 @@ function StickerSpot({
               : STICKER_SPOT_CONTAINER + " text-inactive"
           }
           id={date}
-          onClick={(e) => {
-            e.stopPropagation();
-            placeSticker(date, row_idx);
-          }}
+          onClick={
+            active
+              ? (e) => {
+                  e.stopPropagation();
+                  placeSticker(date, row_idx);
+                }
+              : () => {}
+          }
         >
           {isToday ? (
             <TodayCircle className="w-full h-full absolute" />
