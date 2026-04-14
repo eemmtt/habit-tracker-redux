@@ -6,9 +6,10 @@ import TodayCircle from "./svgs/TodayCircle";
 import DayCircle from "./svgs/DayCircle";
 
 const STICKER_SPOT_CONTAINER =
-  "relative aspect-square flex items-center justify-center hover:outline";
+  "relative aspect-square flex items-center justify-center";
 
 function StickerSpot({
+  omitted,
   active,
   isToday,
   label,
@@ -18,6 +19,7 @@ function StickerSpot({
   placeSticker,
   removeSticker,
 }: {
+  omitted: boolean;
   active: boolean;
   isToday: boolean;
   label: string;
@@ -27,13 +29,21 @@ function StickerSpot({
   placeSticker: (d: string, idx: number) => void;
   removeSticker: (id: string) => void;
 }) {
+  if (omitted)
+    return (
+      <div id={date} className={STICKER_SPOT_CONTAINER}>
+        <DayCircle className="w-1/2 h-1/2 absolute" />
+      </div>
+    );
+
   return (
     <>
       {sticker ? (
         <div
           className={
             active
-              ? STICKER_SPOT_CONTAINER + " text-primary cursor-pointer"
+              ? STICKER_SPOT_CONTAINER +
+                " text-primary cursor-pointer hover:outline"
               : STICKER_SPOT_CONTAINER + " text-inactive"
           }
           id={date}
@@ -62,7 +72,8 @@ function StickerSpot({
         <div
           className={
             active
-              ? STICKER_SPOT_CONTAINER + " text-primary cursor-pointer"
+              ? STICKER_SPOT_CONTAINER +
+                " text-primary cursor-pointer hover:outline"
               : STICKER_SPOT_CONTAINER + " text-inactive"
           }
           id={date}
@@ -90,6 +101,7 @@ function StickerSpot({
 function StickerArea({
   classes,
   time,
+  summary,
   stickers,
   row_idx,
   disabled,
@@ -98,6 +110,7 @@ function StickerArea({
 }: {
   classes: { root: string };
   time: HabitWeek;
+  summary: HabitSummary;
   stickers: StickerSummary[];
   row_idx: number;
   disabled: boolean;
@@ -114,6 +127,7 @@ function StickerArea({
           label={d.label}
           date={d.date}
           isToday={idx === todayIdx}
+          omitted={d.date.localeCompare(summary.start_date) < 0}
           active={!disabled && idx <= todayIdx}
           sticker={
             stickers.filter(
@@ -193,7 +207,7 @@ export function HabitCard({
           e.preventDefault();
         }
       }}
-      className="w-full max-w-100 h-fit rounded bg-card-bg shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] pb-2 focus:outline focus:outline-primary"
+      className="w-full max-w-100 h-fit rounded bg-card-bg shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] pb-2 focus:outline focus:outline-primary hover:outline hover:outline-primary"
     >
       <div className="flex flex-row">
         <Stat
@@ -237,6 +251,7 @@ export function HabitCard({
           key={i}
           time={time}
           row_idx={i}
+          summary={summary}
           stickers={summary.stickers}
           disabled={fetcher.state !== "idle"}
           classes={{

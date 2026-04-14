@@ -30,6 +30,7 @@ export type HabitSummary = Pick<
   | "interval"
   | "reps"
   | "current_sticker_pack_id"
+  | "start_date"
 > & {
   type_str: string;
   adh: string;
