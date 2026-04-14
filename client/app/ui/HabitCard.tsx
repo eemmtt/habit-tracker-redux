@@ -33,7 +33,7 @@ function StickerSpot({
         <div
           className={
             active
-              ? STICKER_SPOT_CONTAINER + " text-primary"
+              ? STICKER_SPOT_CONTAINER + " text-primary cursor-pointer"
               : STICKER_SPOT_CONTAINER + " text-inactive"
           }
           id={date}
@@ -58,7 +58,7 @@ function StickerSpot({
         <div
           className={
             active
-              ? STICKER_SPOT_CONTAINER + " text-primary"
+              ? STICKER_SPOT_CONTAINER + " text-primary cursor-pointer"
               : STICKER_SPOT_CONTAINER + " text-inactive"
           }
           id={date}
@@ -109,7 +109,7 @@ function StickerArea({
           active={!disabled && idx <= todayIdx}
           sticker={
             stickers.filter(
-              (v) => v.row_idx === row_idx && v.placed_at === d.date,
+              (v) => v.row_idx === row_idx && v.placed_date === d.date,
             )[0]
           }
           row_idx={row_idx}
@@ -147,7 +147,7 @@ export function HabitCard({
         intent: "place",
         habit_id: summary.id,
         pack_id: summary.current_sticker_pack_id,
-        placed_at: date,
+        placed_date: date,
         row_idx: idx,
       },
       { method: "POST" },

@@ -14,15 +14,13 @@ export type PlacedSticker = typeof table_stickers_placed.$inferSelect;
 export type CreateHabitFormData = ReturnType<typeof insertHabitSchema.parse>;
 export type StickerSummary = {
   sticker_placed_id: string;
-  placed_at: string;
+  placed_date: string;
   variant: "Normal" | "Foil";
   row_idx: number;
   sticker_id: string;
   imageUrl: string | null;
   sticker_name: string;
 };
-
-export type StickersByPlacedAt = Map<string, StickerSummary[]>;
 
 export type HabitSummary = Pick<
   Habit,
@@ -36,10 +34,6 @@ export type HabitSummary = Pick<
   type_str: string;
   adh: string;
   next_ms: string;
-  // stickers: Array<
-  //   Pick<PlacedSticker, "id" | "placed_at" | "variant"> &
-  //     Pick<Sticker, "imageUrl">
-  // >;
   stickers: StickerSummary[];
 };
 
@@ -63,9 +57,4 @@ export type HabitWeek = {
     date: string; //yyyy-mm-dd
     label: DayLabels;
   }[];
-};
-
-export type HabitSummaryAndWeek = {
-  summaries: HabitSummary[];
-  habitWeek: HabitWeek;
 };

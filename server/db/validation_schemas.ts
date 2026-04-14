@@ -12,12 +12,19 @@ export const insertHabitSchema = createInsertSchema(table_habits, {
   reps: z.number().int().positive().max(2),
   current_sticker_pack_id: z.uuid(),
   description: z.string().max(72),
-}).pick({
-  description: true,
-  interval: true,
-  reps: true,
-  current_sticker_pack_id: true,
-});
+})
+  .pick({
+    description: true,
+    interval: true,
+    reps: true,
+    current_sticker_pack_id: true,
+  })
+  .extend({
+    clientToday: z
+      .string()
+      .length(10)
+      .regex(/^\d{4}-\d{2}-\d{2}$/),
+  });
 
 export const insertVerificationCodeSchema = createInsertSchema(
   table_verification_codes,
@@ -42,16 +49,24 @@ export const insertPlacedStickerSchema = createInsertSchema(
   table_stickers_placed,
   {
     habit_id: z.uuid(),
-    placed_at: z
+    placed_date: z
       .string()
       .length(10)
       .regex(/^\d{4}-\d{2}-\d{2}$/),
     row_idx: z.number().int().nonnegative().max(2),
   },
 )
-  .pick({ habit_id: true, placed_at: true, row_idx: true })
+  .pick({ habit_id: true, placed_date: true, row_idx: true })
   .extend({
     pack_id: z.uuid(),
+    clientToday: z
+      .string()
+      .length(10)
+      .regex(/^\d{4}-\d{2}-\d{2}$/),
+    clientWeekStart: z
+      .string()
+      .length(10)
+      .regex(/^\d{4}-\d{2}-\d{2}$/),
   });
 
 export const removePlacedStickerSchema = createSelectSchema(
@@ -60,7 +75,44 @@ export const removePlacedStickerSchema = createSelectSchema(
     id: z.uuid(),
     habit_id: z.uuid(),
   },
-).pick({
-  id: true,
-  habit_id: true,
-});
+)
+  .pick({
+    id: true,
+    habit_id: true,
+  })
+  .extend({
+    clientToday: z
+      .string()
+      .length(10)
+      .regex(/^\d{4}-\d{2}-\d{2}$/),
+    clientWeekStart: z
+      .string()
+      .length(10)
+      .regex(/^\d{4}-\d{2}-\d{2}$/),
+  });
+
+export const selectHabitsSchema = createSelectSchema(table_habits)
+  .pick({})
+  .extend({
+    clientToday: z
+      .string()
+      .length(10)
+      .regex(/^\d{4}-\d{2}-\d{2}$/),
+    clientWeekStart: z
+      .string()
+      .length(10)
+      .regex(/^\d{4}-\d{2}-\d{2}$/),
+  });
+
+export const selectOneHabitSchema = createSelectSchema(table_habits)
+  .pick({})
+  .extend({
+    clientToday: z
+      .string()
+      .length(10)
+      .regex(/^\d{4}-\d{2}-\d{2}$/),
+    clientWeekStart: z
+      .string()
+      .length(10)
+      .regex(/^\d{4}-\d{2}-\d{2}$/),
+  });

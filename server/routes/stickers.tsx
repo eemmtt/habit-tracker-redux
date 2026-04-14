@@ -11,9 +11,7 @@ import {
   table_stickers_placed,
 } from "../db/schema";
 import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
-import { dateToStr } from "../lib/time";
 import { getHabitSummary } from "../lib/habits";
-import { HabitSummary } from "../../shared/types";
 
 const stickers = new Hono<{ Variables: CtxVariables }>();
 
@@ -29,7 +27,14 @@ stickers.post("/place", async (c) => {
       },
       400,
     );
-  const { habit_id, placed_at, pack_id, row_idx } = validated.data;
+  const {
+    habit_id,
+    placed_date,
+    pack_id,
+    row_idx,
+    clientToday,
+    clientWeekStart,
+  } = validated.data;
   const user_id = c.get("user_id");
 
   //if placed sticker exists but was deleted, restore it and increment streak
@@ -45,7 +50,7 @@ stickers.post("/place", async (c) => {
             eq(table_stickers_placed.habit_id, habit_id),
             eq(table_stickers_placed.row_idx, row_idx),
             eq(table_stickers_placed.user_id, user_id),
-            sql`${table_stickers_placed.placed_at}::date = ${placed_at}::date`,
+            eq(table_stickers_placed.placed_date, placed_date),
             isNotNull(table_stickers_placed.deleted_at),
           ),
         )
@@ -61,7 +66,7 @@ stickers.post("/place", async (c) => {
           and(
             eq(table_stickers_placed.habit_id, habit_id),
             eq(table_stickers_placed.user_id, user_id),
-            sql`${table_stickers_placed.placed_at}::date = ${placed_at}::date`,
+            eq(table_stickers_placed.placed_date, placed_date),
             isNull(table_stickers_placed.deleted_at),
           ),
         );
@@ -86,7 +91,12 @@ stickers.post("/place", async (c) => {
   } catch (error) {}
 
   if (stickerUpdateRes.length > 0) {
-    const summary = await getHabitSummary(user_id, habit_id);
+    const summary = await getHabitSummary(
+      clientToday,
+      user_id,
+      habit_id,
+      clientWeekStart,
+    );
     if (summary.status !== 200)
       return c.json(
         { msg: "Sticker placed but could not retrieve updated HabitSummary" },
@@ -115,6 +125,7 @@ stickers.post("/place", async (c) => {
         sticker_id: stickers[rIdx].id,
         variant: "Normal",
         row_idx: row_idx,
+        placed_date: placed_date,
       });
 
       const [{ count }] = await tx
@@ -124,7 +135,7 @@ stickers.post("/place", async (c) => {
           and(
             eq(table_stickers_placed.habit_id, habit_id),
             eq(table_stickers_placed.user_id, user_id),
-            sql`${table_stickers_placed.placed_at}::date = CURRENT_DATE`,
+            eq(table_stickers_placed.placed_date, clientToday),
             isNull(table_stickers_placed.deleted_at),
           ),
         );
@@ -151,7 +162,12 @@ stickers.post("/place", async (c) => {
       500,
     );
   }
-  const summary = await getHabitSummary(user_id, habit_id);
+  const summary = await getHabitSummary(
+    clientToday,
+    user_id,
+    habit_id,
+    clientWeekStart,
+  );
   if (summary.status !== 200)
     return c.json(
       { msg: "Sticker placed but could not retrieve updated HabitSummary" },
@@ -173,7 +189,7 @@ stickers.post("/remove", async (c) => {
       },
       400,
     );
-  const { id, habit_id } = validated.data;
+  const { id, habit_id, clientWeekStart, clientToday } = validated.data;
 
   let result = [];
   try {
@@ -189,7 +205,7 @@ stickers.post("/remove", async (c) => {
         )
         .returning({
           id: table_stickers_placed.id,
-          placed_at: table_stickers_placed.placed_at,
+          placed_date: table_stickers_placed.placed_date,
         });
 
       if (result.length === 0) return;
@@ -201,7 +217,7 @@ stickers.post("/remove", async (c) => {
           and(
             eq(table_stickers_placed.habit_id, habit_id),
             eq(table_stickers_placed.user_id, user_id),
-            sql`${table_stickers_placed.placed_at}::date = ${dateToStr(result[0].placed_at)}::date`,
+            eq(table_stickers_placed.placed_date, result[0].placed_date),
             isNull(table_stickers_placed.deleted_at),
           ),
         );
@@ -233,7 +249,12 @@ stickers.post("/remove", async (c) => {
   if (result.length === 0)
     return c.json({ msg: "Sticker not found to remove" }, 404);
 
-  const summary = await getHabitSummary(user_id, habit_id);
+  const summary = await getHabitSummary(
+    clientToday,
+    user_id,
+    habit_id,
+    clientWeekStart,
+  );
   if (summary.status !== 200)
     return c.json(
       { msg: "Sticker removed but could not retrieve updated HabitSummary" },

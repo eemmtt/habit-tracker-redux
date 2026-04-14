@@ -7,11 +7,14 @@ import {
 import { configDotenv } from "dotenv";
 
 const milestones = [
+  { num_days: 3, label: "3 d", iconKey: "ms_3" },
   { num_days: 7, label: "7 d", iconKey: "ms_7" },
   { num_days: 14, label: "14 d", iconKey: "ms_14" },
   { num_days: 28, label: "28 d", iconKey: "ms_28" },
   { num_days: 50, label: "50 d", iconKey: "ms_50" },
   { num_days: 100, label: "100 d", iconKey: "ms_100" },
+  { num_days: 180, label: "180 d", iconKey: "ms_180" },
+  { num_days: 365, label: "365 d", iconKey: "ms_365" },
 ];
 
 async function main() {
@@ -23,7 +26,6 @@ async function main() {
 
   await db.delete(table_sticker_packs);
   const stickerPackValues: (typeof table_sticker_packs.$inferInsert)[] = [
-    { name: "test", description: "Test sticker pack" },
     { name: "Ichabod", description: "He's just a little tiny man" },
   ];
   const stickerPacks = await db

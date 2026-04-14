@@ -11,6 +11,7 @@ import {
 import type { CreateHabitFormData, Habit } from "@shared/types";
 import StickerPackSelection from "~/ui/StickerPackSelection";
 import type { FetchReturn, RouteHandle } from "~/types";
+import { getToday } from "~/lib/time";
 
 export const handle: RouteHandle = { title: "New Habit", parent: "/" };
 
@@ -35,6 +36,7 @@ export async function action({ request }: Route.ActionArgs) {
         interval: formData.get("interval"),
         reps: Number(formData.get("reps")),
         current_sticker_pack_id: formData.get("current_sticker_pack_id"),
+        clientToday: getToday(),
       }),
     });
     let out: FetchReturn;

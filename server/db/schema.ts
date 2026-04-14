@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import { date } from "drizzle-orm/pg-core";
 import { text } from "drizzle-orm/pg-core";
 import { check } from "drizzle-orm/pg-core";
 import {
@@ -16,8 +17,10 @@ export const table_users = pgTable("users", {
   id: uuid().primaryKey().defaultRandom(),
   email: varchar({ length: 254 }).notNull().unique(),
   verified: boolean().default(false),
-  created_at: timestamp("created_at").defaultNow().notNull(),
-  deleted_at: timestamp("deleted_at"),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  deleted_at: timestamp("deleted_at", { withTimezone: true }),
 });
 
 export const table_sessions = pgTable("sessions", {
@@ -26,8 +29,12 @@ export const table_sessions = pgTable("sessions", {
     .notNull()
     .references(() => table_users.id),
   session_token: uuid().notNull().unique(),
-  created_at: timestamp("created_at").defaultNow().notNull(),
-  expires_at: timestamp("expires_at").default(sql`now() + interval '30 days'`),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  expires_at: timestamp("expires_at", { withTimezone: true }).default(
+    sql`now() + interval '30 days'`,
+  ),
 });
 
 export const table_verification_codes = pgTable("verificationCodes", {
@@ -36,7 +43,7 @@ export const table_verification_codes = pgTable("verificationCodes", {
     .notNull()
     .references(() => table_users.id),
   code: varchar({ length: 6 }).notNull(),
-  expires_at: timestamp("expires_at").default(
+  expires_at: timestamp("expires_at", { withTimezone: true }).default(
     sql`now() + interval '10 minutes'`,
   ),
 });
@@ -51,8 +58,8 @@ export const table_habits = pgTable(
       .notNull()
       .references(() => table_users.id),
     description: varchar({ length: 72 }).notNull(),
-    started_at: timestamp("started_at").defaultNow().notNull(),
-    deleted_at: timestamp("deleted_at"),
+    start_date: date("started_date").notNull(),
+    deleted_at: timestamp("deleted_at", { withTimezone: true }),
     interval: habitTypeEnum().notNull(),
     reps: integer().notNull().default(1),
     current_sticker_pack_id: uuid()
@@ -60,7 +67,6 @@ export const table_habits = pgTable(
       .references(() => table_sticker_packs.id),
     current_streak: integer().notNull().default(0),
     max_streak: integer().notNull().default(0),
-    last_completed_at: timestamp("last_completed_at"),
     total_completed: integer().notNull().default(0),
   },
   (t) => [
@@ -100,12 +106,12 @@ export const table_stickers_placed = pgTable(
     sticker_id: uuid()
       .notNull()
       .references(() => table_stickers.id),
-    placed_at: timestamp("placed_at").defaultNow().notNull(),
-    deleted_at: timestamp("deleted_at"),
+    placed_date: date("placed_date").notNull(),
+    deleted_at: timestamp("deleted_at", { withTimezone: true }),
     variant: stickerVariantEnum().notNull(),
     row_idx: integer().notNull().default(0),
   },
-  (t) => [unique().on(t.habit_id, t.placed_at, t.row_idx)],
+  (t) => [unique().on(t.habit_id, t.placed_date, t.row_idx)],
 );
 
 export const table_milestones = pgTable("milestones", {

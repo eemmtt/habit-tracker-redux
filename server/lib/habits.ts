@@ -1,6 +1,5 @@
 import { and, eq, gte, inArray, isNull, sql } from "drizzle-orm";
-import { dateToStr, getAdh } from "../lib/time";
-import { HabitSummary } from "../../shared/types";
+import { getAdh } from "../lib/time";
 import {
   table_habits,
   table_milestones,
@@ -39,7 +38,12 @@ export function getTypeStr(interval: string, reps: number) {
   }
 }
 
-export async function getHabitSummary(user_id: string, habit_id: string) {
+export async function getHabitSummary(
+  clientToday: string,
+  user_id: string,
+  habit_id: string,
+  weekStart: string,
+) {
   const [habit] = await db
     .select({
       id: table_habits.id,
@@ -48,7 +52,7 @@ export async function getHabitSummary(user_id: string, habit_id: string) {
       interval: table_habits.interval,
       reps: table_habits.reps,
       current_sticker_pack_id: table_habits.current_sticker_pack_id,
-      started_at: table_habits.started_at,
+      start_date: table_habits.start_date,
       total_completed: table_habits.total_completed,
     })
     .from(table_habits)
@@ -67,7 +71,7 @@ export async function getHabitSummary(user_id: string, habit_id: string) {
     .select({
       habitId: table_stickers_placed.habit_id,
       sticker_placed_id: table_stickers_placed.id,
-      placed_at: table_stickers_placed.placed_at,
+      placed_date: table_stickers_placed.placed_date,
       variant: table_stickers_placed.variant,
       sticker_id: table_stickers.id,
       imageUrl: table_stickers.imageUrl,
@@ -82,17 +86,16 @@ export async function getHabitSummary(user_id: string, habit_id: string) {
     .where(
       and(
         eq(table_stickers_placed.habit_id, habit.id),
-        gte(table_stickers_placed.placed_at, sql`date_trunc('week', now())`),
+        gte(table_stickers_placed.placed_date, sql`${weekStart}::date`),
         isNull(table_stickers_placed.deleted_at),
       ),
     );
 
   const milestones = await db.select().from(table_milestones);
 
-  const habitStickers = stickers.map(({ habitId, placed_at, ...s }) => {
+  const habitStickers = stickers.map(({ habitId, ...s }) => {
     return {
       ...s,
-      placed_at: dateToStr(placed_at),
     };
   });
 
@@ -102,7 +105,12 @@ export async function getHabitSummary(user_id: string, habit_id: string) {
       ...habit,
       type_str: getTypeStr(habit.interval, habit.reps),
       next_ms: getNextMs(habit.current_streak, milestones).label,
-      adh: getAdh(habit.started_at, habit.total_completed, habit.reps),
+      adh: getAdh(
+        clientToday,
+        habit.start_date,
+        habit.total_completed,
+        habit.reps,
+      ),
       stickers: habitStickers,
     },
     status: 200,
