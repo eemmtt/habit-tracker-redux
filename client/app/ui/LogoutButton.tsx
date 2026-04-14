@@ -5,7 +5,7 @@ export default function LogoutButton() {
 
   return (
     <button
-      className="text-sm cursor-pointer w-fit px-1 focus:outline focus:outline-primary"
+      className="text-sm cursor-pointer w-fit px-1 focus:outline focus:outline-primary hover:outline hover:outline-primary"
       onClick={async (e) => {
         e.preventDefault();
         fetcher.submit(

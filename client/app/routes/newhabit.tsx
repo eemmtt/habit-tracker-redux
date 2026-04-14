@@ -141,7 +141,7 @@ export default function NewHabit() {
         <div className="flex flex-col gap-1 w-full max-w-sm">
           <label htmlFor="input-habit-description">Habit Description:</label>
           <textarea
-            className="border"
+            className="border text-sm"
             minLength={8}
             maxLength={72}
             id="input-habit-description"
@@ -153,7 +153,7 @@ export default function NewHabit() {
         <div className="flex flex-col gap-1 w-full max-w-sm">
           <label htmlFor="input-habit-type">Habit Type:</label>
           <select
-            className="border"
+            className="border text-sm"
             id="input-habit-type"
             name="habit-type"
             value={habitTypeKey}
@@ -185,13 +185,13 @@ export default function NewHabit() {
         <div className="flex flex-row gap-2 w-full max-w-sm">
           <button
             type="submit"
-            className="text-sm cursor-pointer w-fit px-1 focus:outline focus:outline-primary"
+            className="text-sm cursor-pointer w-fit px-1 focus:outline focus:outline-primary hover:outline hover:outline-primary"
           >
             Create Habit
           </button>
           <Link
             to="/"
-            className="text-sm cursor-pointer w-fit px-1 focus:outline focus:outline-primary"
+            className="text-sm cursor-pointer w-fit px-1 focus:outline focus:outline-primary hover:outline hover:outline-primary"
           >
             Cancel
           </Link>

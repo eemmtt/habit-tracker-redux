@@ -19,7 +19,7 @@ export default function ProtectedLayout() {
         {parent && (
           <Link
             to={parent}
-            className="text-xl px-1 cursor-pointer focus:outline focus:outline-primary"
+            className="text-xl px-1 cursor-pointer focus:outline focus:outline-primary hover:outline hover:outline-primary"
           >
             &larr;
           </Link>
@@ -27,7 +27,7 @@ export default function ProtectedLayout() {
         {title === "Home" && (
           <Link
             to="/settings"
-            className="text-xl px-1 cursor-pointer focus:outline focus:outline-primary"
+            className="text-xl px-1 cursor-pointer focus:outline focus:outline-primary hover:outline hover:outline-primary"
           >
             &#8942;
           </Link>

@@ -94,7 +94,7 @@ function HabitList({ summaries }: { summaries: HabitSummary[] }) {
 
       <Link
         to="/new-habit"
-        className="text-sm cursor-pointer w-fit px-1 focus:outline focus:outline-primary self-center justify-self-center"
+        className="text-sm cursor-pointer w-fit px-1 focus:outline focus:outline-primary hover:outline hover:outline-primary self-center justify-self-center"
       >
         START NEW HABIT
       </Link>
